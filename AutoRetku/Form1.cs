@@ -59,7 +59,14 @@ namespace AutoRetku
         {
             using (WebClient client = new WebClient())
             {
-                return client.DownloadString(url);
+                try
+                {
+                    return client.DownloadString(url);
+                }
+                catch (Exception)
+                {
+                    return "";
+                }
             }
         }
 
@@ -373,20 +380,26 @@ namespace AutoRetku
             {
                 string source = GetSource("https://api.twitch.tv/kraken/streams?channel=" + service_user); // Get json source code from Twitch API
 
-                if (source.Contains("\"status\"")) // If "status" exists in json, stream is Live
+                if (source != "")
                 {
-                    retrieved_status = stringBetween(source, "\"status\":\"", "\"");
-                    return true;
+                    if (source.Contains("\"status\"")) // If "status" exists in json, stream is Live
+                    {
+                        retrieved_status = stringBetween(source, "\"status\":\"", "\"");
+                        return true;
+                    }
                 }
             }
             else if (serviceid == 2)
             {
                 string source = GetSource("http://api.hitbox.tv/media/live/" + service_user); // Get json source code from Hitbox API
 
-                if (source.Contains("\"media_is_live\":\"1\"")) // If media_is_live":"1" exists in json, stream is Live
+                if (source != "")
                 {
-                    retrieved_status = stringBetween(source, "\"status\":\"", "\"");
-                    return true;
+                    if (source.Contains("\"media_is_live\":\"1\"")) // If media_is_live":"1" exists in json, stream is Live
+                    {
+                        retrieved_status = stringBetween(source, "\"status\":\"", "\"");
+                        return true;
+                    }
                 }
             }
 
@@ -480,18 +493,24 @@ namespace AutoRetku
                 {
                     string source = GetSource("https://api.twitch.tv/kraken/streams?channel=" + service_user); // Get json source code from Twitch API
 
-                    if (source.Contains("\"status\"")) // If "status" exists in json, stream is Live
+                    if (source != "")
                     {
-                        retrieved_status = stringBetween(source, "\"status\":\"", "\"");
+                        if (source.Contains("\"status\"")) // If "status" exists in json, stream is Live
+                        {
+                            retrieved_status = stringBetween(source, "\"status\":\"", "\"");
+                        }
                     }
                 }
                 else if (selectedService() == 2)
                 {
                     string source = GetSource("http://api.hitbox.tv/media/live/" + service_user); // Get json source code from Hitbox API
 
-                    if (source.Contains("\"media_is_live\":\"1\"")) // If media_is_live":"1" exists in json, stream is Live
+                    if (source != "")
                     {
-                        retrieved_status = stringBetween(source, "\"status\":\"", "\"");
+                        if (source.Contains("\"media_is_live\":\"1\"")) // If media_is_live":"1" exists in json, stream is Live
+                        {
+                            retrieved_status = stringBetween(source, "\"status\":\"", "\"");
+                        }
                     }
                 }
 
