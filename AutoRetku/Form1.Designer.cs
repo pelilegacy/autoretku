@@ -55,6 +55,7 @@
             this.timer_refresh = new System.Windows.Forms.Timer(this.components);
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.button_retrievedesc = new System.Windows.Forms.Button();
             this.comboBox_service = new System.Windows.Forms.ComboBox();
             this.checkBox_service_end = new System.Windows.Forms.CheckBox();
             this.checkBox_service_start = new System.Windows.Forms.CheckBox();
@@ -461,6 +462,7 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.button_retrievedesc);
             this.groupBox1.Controls.Add(this.comboBox_service);
             this.groupBox1.Controls.Add(this.checkBox_service_end);
             this.groupBox1.Controls.Add(this.checkBox_service_start);
@@ -471,6 +473,16 @@
             this.groupBox1.Size = new System.Drawing.Size(427, 101);
             this.groupBox1.TabIndex = 27;
             this.groupBox1.TabStop = false;
+            // 
+            // button_retrievedesc
+            // 
+            this.button_retrievedesc.Location = new System.Drawing.Point(251, 20);
+            this.button_retrievedesc.Name = "button_retrievedesc";
+            this.button_retrievedesc.Size = new System.Drawing.Size(170, 23);
+            this.button_retrievedesc.TabIndex = 29;
+            this.button_retrievedesc.Text = "Nouda kuvaus palvelusta";
+            this.button_retrievedesc.UseVisualStyleBackColor = true;
+            this.button_retrievedesc.Click += new System.EventHandler(this.button_retrievedesc_Click);
             // 
             // comboBox_service
             // 
@@ -483,6 +495,7 @@
             this.comboBox_service.Name = "comboBox_service";
             this.comboBox_service.Size = new System.Drawing.Size(78, 21);
             this.comboBox_service.TabIndex = 28;
+            this.comboBox_service.SelectedIndexChanged += new System.EventHandler(this.comboBox_service_SelectedIndexChanged);
             // 
             // checkBox_service_end
             // 
@@ -524,7 +537,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(451, 217);
+            this.ClientSize = new System.Drawing.Size(451, 83);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.button_update_desc);
@@ -592,6 +605,7 @@
         private System.Windows.Forms.TextBox textBox_service_user;
         private System.Windows.Forms.Label label_service_user;
         private System.Windows.Forms.ComboBox comboBox_service;
+        private System.Windows.Forms.Button button_retrievedesc;
     }
 }
 

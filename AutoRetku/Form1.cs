@@ -6,6 +6,8 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.Net;
+using System.Diagnostics;
+using System.IO;
 
 namespace AutoRetku
 {
@@ -16,7 +18,6 @@ namespace AutoRetku
             InitializeComponent();
         }
 
-        public static readonly string Empty;
         public Boolean runonce = false;
         public Boolean timerRunning = false;
         public Boolean logged = false;
@@ -24,20 +25,23 @@ namespace AutoRetku
         public Boolean workerStarted = false;
         public Boolean StatusChecked = false;
         public int notificationStatus = 0;
+        public Boolean allowServiceChange = false;
 
+        public string retrieved_status;
         public string username = "";
         public string password = "";
+        public string log = "";
 
         public string service_user;
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            MessageBox.Show(System.Reflection.Assembly.GetExecutingAssembly()
+            this.Text = this.Text + " (" + System.Reflection.Assembly.GetExecutingAssembly()
                                            .GetName()
                                            .Version
-                                           .ToString());
+                                           .ToString() + ")";
 
-            // Setting automatically times for dropdown boxes
+            // Setting dropdown boxes automatically
             DateTime current = DateTime.Now;
             comboBox_starting_hour.Text = current.ToString("HH");
             comboBox_starting_minute.Text = current.ToString("mm");
@@ -112,7 +116,7 @@ namespace AutoRetku
             password = textBox_password.Text;
             service_user = textBox_service_user.Text;
 
-            if (textBox_service_user.Text == Empty)
+            if (textBox_service_user.Text == "")
             {
                 worker_streamsvc.RunWorkerAsync();
             }
@@ -152,6 +156,9 @@ namespace AutoRetku
         {
             if (logged == true)
             {
+                this.Height = 255;
+
+
                 if (webBrowser_retku.Url == new Uri("http://www.nesretku.com/index.php"))
                 {
                     webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
@@ -197,38 +204,41 @@ namespace AutoRetku
 
         private void worker_service_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) //  Running in background to monitor and edit stream status
         {
-            if (isStartOnOnline()) // if checkBox_service_start is checked
+            if (textBox_service_user.Text != "")
             {
-                if (selectedService() == 1) // if selected service is Twitch
+                if (isStartOnOnline()) // if checkBox_service_start is checked
                 {
-                    if (isLive(1, textBox_service_user.Text)) // if Twitch is Live
+                    if (selectedService() == 1) // if selected service is Twitch
                     {
-                        setRetkuOn();
+                        if (isLive(1, textBox_service_user.Text)) // if Twitch is Live
+                        {
+                            setRetkuOn();
+                        }
+                    }
+                    else if (selectedService() == 2) // if selected service is Hitbox
+                    {
+                        if (isLive(2, textBox_service_user.Text)) // if Hitbox is Live
+                        {
+                            setRetkuOn();
+                        }
                     }
                 }
-                else if (selectedService() == 2) // if selected service is Hitbox
-                {
-                    if (isLive(2, textBox_service_user.Text)) // if Hitbox is Live
-                    {
-                        setRetkuOn();
-                    }
-                }
-            }
 
-            if (isStopOnOffline())  // if checkBox_service_end is checked
-            {
-                if (selectedService() == 1) // if selected service is Twitch
+                if (isStopOnOffline())  // if checkBox_service_end is checked
                 {
-                    if (!isLive(1, textBox_service_user.Text)) // if Twitch is Live
+                    if (selectedService() == 1) // if selected service is Twitch
                     {
-                        setRetkuOff();
+                        if (!isLive(1, textBox_service_user.Text)) // if Twitch is Live
+                        {
+                            setRetkuOff();
+                        }
                     }
-                }
-                else if (selectedService() == 2) // if selected service is Hitbox
-                {
-                    if (!isLive(2, textBox_service_user.Text)) // if Hitbox is Live
+                    else if (selectedService() == 2) // if selected service is Hitbox
                     {
-                        setRetkuOff();
+                        if (!isLive(2, textBox_service_user.Text)) // if Hitbox is Live
+                        {
+                            setRetkuOff();
+                        }
                     }
                 }
             }
@@ -253,6 +263,20 @@ namespace AutoRetku
                 {
                     if (StatusChecked == false && logged == true)
                     {
+                        HtmlElementCollection select;
+                        HtmlElement service_option;
+                        select = webBrowser_retku.Document.GetElementsByTagName("select");
+                        service_option = select["palvelin"];
+
+                        if (service_option.GetAttribute("value").ToString() == "3")
+                        {
+                            comboBox_service.SelectedIndex = 0;
+                        }
+                        else
+                        {
+                            comboBox_service.SelectedIndex = 1;
+                        }
+
                         if (webBrowser_retku.DocumentText.Contains("alt=\"Kiinni\""))
                         {
                             pictureBox1.Image = AutoRetku.Properties.Resources.red;
@@ -318,9 +342,7 @@ namespace AutoRetku
             try
             {
                 logged = false;
-                string[] logoutparse1 = webBrowser_retku.DocumentText.Split(new string[] { "http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=" }, StringSplitOptions.None);
-                string[] logoutparse2 = logoutparse1[1].Split(new string[] { "&logout=t&redirect=http://www.nesretku.com/index.php" }, StringSplitOptions.None);
-                webBrowser_retku.Navigate("http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=" + logoutparse2[0] + "&logout=t&redirect=http://www.nesretku.com/index.php");
+                webBrowser_retku.Navigate("http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=" + stringBetween(webBrowser_retku.DocumentText, "http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=", "&logout=t&redirect=http://www.nesretku.com/index.php") + "&logout=t&redirect=http://www.nesretku.com/index.php");
             }
             catch (Exception)
             {
@@ -355,6 +377,7 @@ namespace AutoRetku
 
                 if (source.Contains("\"status\"")) // If "status" exists in json, stream is Live
                 {
+                    retrieved_status = stringBetween(source, "\"status\":\"", "\"");
                     return true;
                 }
             }
@@ -364,10 +387,12 @@ namespace AutoRetku
 
                 if (source.Contains("\"media_is_live\":\"1\"")) // If media_is_live":"1" exists in json, stream is Live
                 {
+                    retrieved_status = stringBetween(source, "\"status\":\"", "\"");
                     return true;
                 }
             }
 
+            retrieved_status = "";
             return false;
         }
 
@@ -439,7 +464,70 @@ namespace AutoRetku
             return;
         }
 
+        public string stringBetween(string str_full, string str_first, string str_second)
+        {
+            string[] strparse = str_full.Split(new string[] { str_first }, StringSplitOptions.None);
+            string[] str_return = strparse[1].Split(new string[] { str_second }, StringSplitOptions.None);
+            return str_return[0];
+        }
+
         #endregion
+
+        private void button_retrievedesc_Click(object sender, EventArgs e)
+        {
+            service_user = textBox_service_user.Text;
+            if (service_user != "")
+            {
+                if (selectedService() == 1)
+                {
+                    string source = GetSource("https://api.twitch.tv/kraken/streams?channel=" + service_user); // Get json source code from Twitch API
+
+                    if (source.Contains("\"status\"")) // If "status" exists in json, stream is Live
+                    {
+                        retrieved_status = stringBetween(source, "\"status\":\"", "\"");
+                    }
+                }
+                else if (selectedService() == 2)
+                {
+                    string source = GetSource("http://api.hitbox.tv/media/live/" + service_user); // Get json source code from Hitbox API
+
+                    if (source.Contains("\"media_is_live\":\"1\"")) // If media_is_live":"1" exists in json, stream is Live
+                    {
+                        retrieved_status = stringBetween(source, "\"status\":\"", "\"");
+                    }
+                }
+
+                textBox_desc.Text = retrieved_status;
+            }
+        }
+
+        private void comboBox_service_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (allowServiceChange)
+            {
+                HtmlElementCollection select, input;
+                HtmlElement service_option, save;
+                select = webBrowser_retku.Document.GetElementsByTagName("select");
+                input = webBrowser_retku.Document.GetElementsByTagName("input");
+                service_option = select["palvelin"];
+                save = input["userConfSubmit"];
+
+                if (selectedService() == 1)
+                {
+                    service_option.SetAttribute("value", "3");
+                }
+                else if (selectedService() == 2)
+                {
+                    service_option.SetAttribute("value", "5");
+                }
+
+                save.InvokeMember("click");
+            }
+            else
+            {
+                allowServiceChange = true;
+            }
+        }
 
     }
 }
