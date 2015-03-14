@@ -156,9 +156,6 @@ namespace AutoRetku
         {
             if (logged == true)
             {
-                this.Height = 255;
-
-
                 if (webBrowser_retku.Url == new Uri("http://www.nesretku.com/index.php"))
                 {
                     webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
@@ -295,6 +292,7 @@ namespace AutoRetku
                     }
 
                     logged = true;
+                    this.Height = 255;
                     label_username.Visible = false;
                     label_password.Visible = false;
                     textBox_username.Visible = false;
