@@ -389,5 +389,30 @@ namespace AutoRetku
             }
             worker_streamsvc.RunWorkerAsync();
         }
+
+        public Boolean isLive(int serviceid, string service_user)
+        {
+            if (serviceid == 1)
+            {
+                string source = GetSource("https://api.twitch.tv/kraken/streams?channel=" + service_user);
+
+                if (source.Contains("\"status\""))
+                {
+                    return true;
+                }
+            }
+
+            if (serviceid == 2)
+            {
+                string source = GetSource("http://api.hitbox.tv/media/live/" + service_user);
+
+                if (source.Contains("\"media_is_live\":\"1\""))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
     }
 }
