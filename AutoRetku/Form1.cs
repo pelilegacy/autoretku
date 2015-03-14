@@ -16,23 +16,19 @@ namespace AutoRetku
             InitializeComponent();
         }
 
+        public static readonly string Empty;
         public Boolean runonce = false;
-        public Boolean running = false;
+        public Boolean timerRunning = false;
         public Boolean logged = false;
-        public Boolean activated = false;
         public Boolean desc_received = false;
         public Boolean workerStarted = false;
         public Boolean StatusChecked = false;
-
-        public Boolean useTwitch = false;
-        public Boolean useHitbox = false;
-        public Boolean runTwitch = false;
-        public Boolean runHitbox = false;
+        public int notificationStatus = 0;
 
         public string username = "";
         public string password = "";
 
-        public string service_user = "";
+        public string service_user;
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -41,57 +37,233 @@ namespace AutoRetku
                                            .Version
                                            .ToString());
 
+            // Setting automatically times for dropdown boxes
             DateTime current = DateTime.Now;
             comboBox_starting_hour.Text = current.ToString("HH");
             comboBox_starting_minute.Text = current.ToString("mm");
-            current = current.AddHours(1);
+            current = current.AddHours(1); // Setting time to one hour from now
             comboBox_ending_hour.Text = current.ToString("HH");
             comboBox_ending_minute.Text = current.ToString("mm");
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void timer_refresh_Tick(object sender, EventArgs e) // timer to refresh nesretku.com to prevent logout
         {
-            if (webBrowser1.Url == new Uri("http://www.nesretku.com/index.php?user=" + username))
+            webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
+        }
+
+        public string GetSource(string url) // Download website source code
+        {
+            using (WebClient client = new WebClient())
             {
-                if(running == false)
+                return client.DownloadString(url);
+            }
+        }
+
+        #region UI events
+
+        private void button_timer_Click(object sender, EventArgs e)
+        {
+            if (webBrowser_retku.Url == new Uri("http://www.nesretku.com/index.php?user=" + username))
+            {
+                if (timerRunning == false)
                 {
                     button_timer.Text = "Pysäytä";
-                    running = true;
+                    timerRunning = true;
 
                     timer_refresh.Start();
                 }
                 else
                 {
                     button_timer.Text = "Ajasta";
-                    running = false;
+                    timerRunning = false;
                 }
             }
         }
 
-        private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        private void button_stop_Click(object sender, EventArgs e)
+        {
+            setRetkuOff();
+        }
+
+        private void button_pause_Click(object sender, EventArgs e)
+        {
+            setRetkuPause();
+        }
+
+        private void button_start_Click(object sender, EventArgs e)
+        {
+            setRetkuOn();
+        }
+
+        private void button_update_desc_Click(object sender, EventArgs e)
+        {
+            HtmlElementCollection input;
+            HtmlElement desc, save;
+            input = webBrowser_retku.Document.GetElementsByTagName("input");
+            desc = input["kuvaus"];
+            save = input["userConfSubmit"];
+            desc.SetAttribute("value", textBox_desc.Text);
+            save.InvokeMember("click");
+        }
+
+        private void button_login_Click(object sender, EventArgs e)
+        {
+            username = textBox_username.Text;
+            password = textBox_password.Text;
+            service_user = textBox_service_user.Text;
+
+            if (textBox_service_user.Text == Empty)
+            {
+                worker_streamsvc.RunWorkerAsync();
+            }
+
+            if (logged == false)
+            {
+                HtmlElementCollection input;
+                HtmlElement input_username, input_password, login;
+                input = webBrowser_retku.Document.GetElementsByTagName("input");
+                input_username = input["username"];
+                input_password = input["password"];
+                login = input["login"];
+                input_username.SetAttribute("value", username);
+                input_password.SetAttribute("value", password);
+                login.InvokeMember("click");
+            }
+        }
+
+        private void Form1_FormClosing(object sender, CancelEventArgs e)
+        {
+            e.Cancel = true;
+            retkuLogOut();
+            e.Cancel = false;
+            Application.Exit();
+        }
+
+        #endregion
+
+        #region BackgroundWorker Events
+
+        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        {
+            System.Threading.Thread.Sleep(1000);
+        }
+
+        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (logged == true)
+            {
+                if (webBrowser_retku.Url == new Uri("http://www.nesretku.com/index.php"))
+                {
+                    webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
+                }
+
+                if (timerRunning == true)
+                {
+                    DateTime time = DateTime.Now;
+                    if ((time.ToString("HH") == comboBox_starting_hour.Text) && (time.ToString("mm") == comboBox_starting_minute.Text))
+                    {
+                        if (notificationStatus == 0)
+                        {
+                            setRetkuOn();
+                        }
+                    }
+
+                    if ((time.ToString("HH") == comboBox_ending_hour.Text) && (time.ToString("mm") == comboBox_ending_minute.Text))
+                    {
+                        setRetkuOff();
+                    }
+                }
+
+                if (webBrowser_retku.Url == new Uri("http://www.nesretku.com/index.php?user=" + username))
+                {
+                    if (desc_received == false)
+                    {
+                        desc_received = true;
+                        HtmlElementCollection input;
+                        HtmlElement desc;
+                        input = webBrowser_retku.Document.GetElementsByTagName("input");
+                        desc = input["kuvaus"];
+                        textBox_desc.Text = desc.GetAttribute("value");
+                    }
+                }
+            }
+            backgroundWorker1.RunWorkerAsync();
+        }
+
+        private void worker_service_DoWork(object sender, DoWorkEventArgs e)  // worker_service_RunWorkerCompleted runs after this thread finishes.
+        {
+            System.Threading.Thread.Sleep(5000);
+        }
+
+        private void worker_service_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) //  Running in background to monitor and edit stream status
+        {
+            if (isStartOnOnline()) // if checkBox_service_start is checked
+            {
+                if (selectedService() == 1) // if selected service is Twitch
+                {
+                    if (isLive(1, textBox_service_user.Text)) // if Twitch is Live
+                    {
+                        setRetkuOn();
+                    }
+                }
+                else if (selectedService() == 2) // if selected service is Hitbox
+                {
+                    if (isLive(2, textBox_service_user.Text)) // if Hitbox is Live
+                    {
+                        setRetkuOn();
+                    }
+                }
+            }
+
+            if (isStopOnOffline())  // if checkBox_service_end is checked
+            {
+                if (selectedService() == 1) // if selected service is Twitch
+                {
+                    if (!isLive(1, textBox_service_user.Text)) // if Twitch is Live
+                    {
+                        setRetkuOff();
+                    }
+                }
+                else if (selectedService() == 2) // if selected service is Hitbox
+                {
+                    if (!isLive(2, textBox_service_user.Text)) // if Hitbox is Live
+                    {
+                        setRetkuOff();
+                    }
+                }
+            }
+
+            worker_streamsvc.RunWorkerAsync();
+        }
+
+        #endregion
+
+        #region webBrowser events
+
+        private void webBrowser_retku_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             if (runonce == false)
             {
                 runonce = true;
-                LogOut();
+                retkuLogOut();
             }
             else
             {
-                if (webBrowser1.DocumentText.Contains("Stream tila"))
+                if (webBrowser_retku.DocumentText.Contains("Stream tila"))
                 {
                     if (StatusChecked == false && logged == true)
                     {
-                        if (webBrowser1.DocumentText.Contains("alt=\"Kiinni\""))
+                        if (webBrowser_retku.DocumentText.Contains("alt=\"Kiinni\""))
                         {
                             pictureBox1.Image = AutoRetku.Properties.Resources.red;
                         }
 
-                        if (webBrowser1.DocumentText.Contains("alt=\"Tauolla\""))
+                        if (webBrowser_retku.DocumentText.Contains("alt=\"Tauolla\""))
                         {
                             pictureBox1.Image = AutoRetku.Properties.Resources.yolo;
                         }
 
-                        if (webBrowser1.DocumentText.Contains("alt=\"Päällä\""))
+                        if (webBrowser_retku.DocumentText.Contains("alt=\"Päällä\""))
                         {
                             pictureBox1.Image = AutoRetku.Properties.Resources.green;
                         }
@@ -131,130 +303,24 @@ namespace AutoRetku
                 }
             }
 
-            if (logged == false && webBrowser1.Url != new Uri("http://www.nesretku.com/index.php"))
+            if (logged == false && webBrowser_retku.Url != new Uri("http://www.nesretku.com/index.php"))
             {
-                webBrowser1.Navigate("http://www.nesretku.com/index.php");
+                webBrowser_retku.Navigate("http://www.nesretku.com/index.php");
             }
         }
 
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
-        {
-            System.Threading.Thread.Sleep(1000);
-        }
+        #endregion
 
-        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (logged == true)
-            {
-                if (webBrowser1.Url == new Uri("http://www.nesretku.com/index.php"))
-                {
-                    webBrowser1.Navigate("http://www.nesretku.com/index.php?user=" + username);
-                }
+        #region Own functions
 
-                if (running == true)
-                {
-                    DateTime time = DateTime.Now;
-                    if ((time.ToString("HH") == comboBox_starting_hour.Text) && (time.ToString("mm") == comboBox_starting_minute.Text))
-                    {
-                        if (activated == false)
-                        {
-                            activated = true;
-                            pictureBox1.Image = AutoRetku.Properties.Resources.green;
-                            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=2");
-                            pictureBox1.Image = AutoRetku.Properties.Resources.green;
-                        }
-                    }
-
-                    if ((time.ToString("HH") == comboBox_ending_hour.Text) && (time.ToString("mm") == comboBox_ending_minute.Text))
-                    {
-                        webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=0");
-                        running = false;
-                        activated = false;
-                        pictureBox1.Image = AutoRetku.Properties.Resources.red;
-                        button_timer.Text = "Ajoita";
-                    }
-                }
-
-                if (webBrowser1.Url == new Uri("http://www.nesretku.com/index.php?user=" + username))
-                {
-                    if (desc_received == false)
-                    {
-                        desc_received = true;
-                        HtmlElementCollection input;
-                        HtmlElement desc;
-                        input = webBrowser1.Document.GetElementsByTagName("input");
-                        desc = input["kuvaus"];
-                        textBox_desc.Text = desc.GetAttribute("value");
-                    }
-                }
-            }
-            backgroundWorker1.RunWorkerAsync();
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            running = false;
-            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=0");
-            pictureBox1.Image = AutoRetku.Properties.Resources.red;
-        }
-
-        private void button3_Click(object sender, EventArgs e)
-        {
-            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=1");
-            pictureBox1.Image = AutoRetku.Properties.Resources.yolo;
-        }
-
-        private void button2_Click(object sender, EventArgs e)
-        {
-            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=2");
-            pictureBox1.Image = AutoRetku.Properties.Resources.green;
-        }
-
-        private void button_update_desc_Click(object sender, EventArgs e)
-        {
-            HtmlElementCollection input;
-            HtmlElement desc, save;
-            input = webBrowser1.Document.GetElementsByTagName("input");
-            desc = input["kuvaus"];
-            save = input["userConfSubmit"];
-            desc.SetAttribute("value", textBox_desc.Text);
-            save.InvokeMember("click");
-        }
-
-        private void button_login_Click(object sender, EventArgs e)
-        {
-            username = textBox_username.Text;
-            password = textBox_password.Text;
-            service_user = textBox_service_user.Text;
-
-            if (textBox_service_user.Text != "")
-            {
-                worker_streamsvc.RunWorkerAsync();
-            }
-
-            if (logged == false)
-            {
-                HtmlElementCollection input;
-                HtmlElement input_username, input_password, login;
-                input = webBrowser1.Document.GetElementsByTagName("input");
-                input_username = input["username"];
-                input_password = input["password"];
-                login = input["login"];
-                input_username.SetAttribute("value", username);
-                input_password.SetAttribute("value", password);
-                login.InvokeMember("click");
-            }
-        }
-
-        public void LogOut()
+        public void retkuLogOut()
         {
             try
             {
                 logged = false;
-                string[] logoutparse1 = webBrowser1.DocumentText.Split(new string[] { "http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=" }, StringSplitOptions.None);
+                string[] logoutparse1 = webBrowser_retku.DocumentText.Split(new string[] { "http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=" }, StringSplitOptions.None);
                 string[] logoutparse2 = logoutparse1[1].Split(new string[] { "&logout=t&redirect=http://www.nesretku.com/index.php" }, StringSplitOptions.None);
-                //MessageBox.Show(logoutparse2[0]);
-                webBrowser1.Navigate("http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=" + logoutparse2[0] + "&logout=t&redirect=http://www.nesretku.com/index.php");
+                webBrowser_retku.Navigate("http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=" + logoutparse2[0] + "&logout=t&redirect=http://www.nesretku.com/index.php");
             }
             catch (Exception)
             {
@@ -264,123 +330,21 @@ namespace AutoRetku
 
         public void CheckStatus()
         {
-            if (webBrowser1.DocumentText.Contains("alt=\"Kiinni\""))
+            if (webBrowser_retku.DocumentText.Contains("alt=\"Kiinni\""))
             {
                 pictureBox1.Image = AutoRetku.Properties.Resources.red;
             }
 
-            if (webBrowser1.DocumentText.Contains("alt=\"Tauolla\""))
+            if (webBrowser_retku.DocumentText.Contains("alt=\"Tauolla\""))
             {
                 pictureBox1.Image = AutoRetku.Properties.Resources.yolo;
             }
 
-            if (webBrowser1.DocumentText.Contains("alt=\"Päällä\""))
+            if (webBrowser_retku.DocumentText.Contains("alt=\"Päällä\""))
             {
                 pictureBox1.Image = AutoRetku.Properties.Resources.green;
             }
             StatusChecked = true;
-        }
-
-        private void Form1_FormClosing(object sender, CancelEventArgs e)
-        {
-            e.Cancel = true;
-            LogOut();
-            e.Cancel = false;
-            Application.Exit();
-        }
-
-        private void timer_refresh_Tick(object sender, EventArgs e)
-        {
-            webBrowser1.Navigate("http://www.nesretku.com/index.php?user=" + service_user);
-        }
-
-        public string GetSource(string url)
-        {
-            using (WebClient client = new WebClient())
-            {
-                return client.DownloadString(url);
-            }
-        }
-
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (comboBox_service.SelectedIndex == 0)
-            {
-                useTwitch = true;
-            }
-        }
-
-        private void checkBox_service_start_CheckedChanged(object sender, EventArgs e) ///////////////// PAKKO TARKISTAA ERIKSEEN checkBox_service_start_CheckedChanged
-        {
-            if (useTwitch == true)
-            {
-                if (checkBox_service_start.Checked == true || checkBox_service_end.Checked == true)
-                {
-                    runTwitch = true;
-                }
-                else
-                {
-                    runTwitch = false;
-                }
-            }
-
-            if (useHitbox == true)
-            {
-                if (checkBox_service_start.Checked == true || checkBox_service_end.Checked == true)
-                {
-                    runHitbox = true;
-                }
-                else
-                {
-                    runHitbox = false;
-                }
-            }
-        }
-
-        private void worker_service_DoWork(object sender, DoWorkEventArgs e)
-        {
-            System.Threading.Thread.Sleep(5000);
-        }
-
-        private void worker_service_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            if (isStartOnOnline()) // if checkBox_service_start is checked
-            {
-                if (selectedService() == 1) // if selected service is Twitch
-                {
-                    if (isLive(1, textBox_service_user.Text)) // if Twitch is Live
-                    {
-                        setRetkuOn();
-                    }
-                }
-                else if (selectedService() == 2) // if selected service is Hitbox
-                {
-                    if (isLive(2, textBox_service_user.Text)) // if Hitbox is Live
-                    {
-                        setRetkuOn();
-                    }
-                }
-            }
-            
-            if (isStopOnOffline())  // if checkBox_service_end is checked
-            {
-                if (selectedService() == 1) // if selected service is Twitch
-                {
-                    if (!isLive(1, textBox_service_user.Text)) // if Twitch is Live
-                    {
-                        setRetkuOff();
-                    }
-                }
-                else if (selectedService() == 2) // if selected service is Hitbox
-                {
-                    if (!isLive(2, textBox_service_user.Text)) // if Hitbox is Live
-                    {
-                        setRetkuOff();
-                    }
-                }
-            }
-
-            worker_streamsvc.RunWorkerAsync();
         }
 
         public Boolean isLive(int serviceid, string service_user) // 1 = Twitch, 2 = Hitbox, service_user = username at streaming service
@@ -394,8 +358,7 @@ namespace AutoRetku
                     return true;
                 }
             }
-
-            if (serviceid == 2)
+            else if (serviceid == 2)
             {
                 string source = GetSource("http://api.hitbox.tv/media/live/" + service_user); // Get json source code from Hitbox API
 
@@ -443,16 +406,40 @@ namespace AutoRetku
             return false;
         }
 
+        public void setRetkuStatus(int status) // 2 = Online, 1 = Paused, 0 = Offline
+        {
+            webBrowser_retku.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=" + status); // Navigate web browser control to url
+        }
+
         public void setRetkuOn()
         {
-            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=2"); // Navigate web browser control to url
+            notificationStatus = 2;
+            setRetkuStatus(2);
             pictureBox1.Image = AutoRetku.Properties.Resources.green; // Set notification image to green.png
+        }
+
+        public void setRetkuPause()
+        {
+            notificationStatus = 1;
+            setRetkuStatus(1);
+            pictureBox1.Image = AutoRetku.Properties.Resources.yolo; // Set notification image to yolo.png
         }
 
         public void setRetkuOff()
         {
-            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=0"); // Navigate web browser control to url
+            notificationStatus = 0;
+            button_timer.Text = "Ajasta";
+            timerRunning = false;
+            setRetkuStatus(0);
             pictureBox1.Image = AutoRetku.Properties.Resources.red;  // Set notification image to red.png
         }
+
+        public void checkNotification()
+        {
+            return;
+        }
+
+        #endregion
+
     }
 }

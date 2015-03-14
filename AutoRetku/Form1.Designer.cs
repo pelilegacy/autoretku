@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.webBrowser1 = new System.Windows.Forms.WebBrowser();
+            this.webBrowser_retku = new System.Windows.Forms.WebBrowser();
             this.button_timer = new System.Windows.Forms.Button();
             this.label_starting = new System.Windows.Forms.Label();
             this.label_ending = new System.Windows.Forms.Label();
@@ -64,16 +64,16 @@
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
-            // webBrowser1
+            // webBrowser_retku
             // 
-            this.webBrowser1.Location = new System.Drawing.Point(349, 155);
-            this.webBrowser1.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser1.Name = "webBrowser1";
-            this.webBrowser1.Size = new System.Drawing.Size(98, 99);
-            this.webBrowser1.TabIndex = 0;
-            this.webBrowser1.Url = new System.Uri("http://www.nesretku.com/index.php", System.UriKind.Absolute);
-            this.webBrowser1.Visible = false;
-            this.webBrowser1.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser1_DocumentCompleted);
+            this.webBrowser_retku.Location = new System.Drawing.Point(349, 155);
+            this.webBrowser_retku.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser_retku.Name = "webBrowser_retku";
+            this.webBrowser_retku.Size = new System.Drawing.Size(98, 99);
+            this.webBrowser_retku.TabIndex = 0;
+            this.webBrowser_retku.Url = new System.Uri("http://www.nesretku.com/index.php", System.UriKind.Absolute);
+            this.webBrowser_retku.Visible = false;
+            this.webBrowser_retku.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_retku_DocumentCompleted);
             // 
             // button_timer
             // 
@@ -84,7 +84,7 @@
             this.button_timer.Text = "Ajasta";
             this.button_timer.UseVisualStyleBackColor = true;
             this.button_timer.Visible = false;
-            this.button_timer.Click += new System.EventHandler(this.button1_Click);
+            this.button_timer.Click += new System.EventHandler(this.button_timer_Click);
             // 
             // label_starting
             // 
@@ -350,7 +350,7 @@
             this.button_start.Text = "Käynnistä";
             this.button_start.UseVisualStyleBackColor = true;
             this.button_start.Visible = false;
-            this.button_start.Click += new System.EventHandler(this.button2_Click);
+            this.button_start.Click += new System.EventHandler(this.button_start_Click);
             // 
             // button_pause
             // 
@@ -361,7 +361,7 @@
             this.button_pause.Text = "Keskeytä";
             this.button_pause.UseVisualStyleBackColor = true;
             this.button_pause.Visible = false;
-            this.button_pause.Click += new System.EventHandler(this.button3_Click);
+            this.button_pause.Click += new System.EventHandler(this.button_pause_Click);
             // 
             // button_stop
             // 
@@ -372,7 +372,7 @@
             this.button_stop.Text = "Pysäytä";
             this.button_stop.UseVisualStyleBackColor = true;
             this.button_stop.Visible = false;
-            this.button_stop.Click += new System.EventHandler(this.button4_Click);
+            this.button_stop.Click += new System.EventHandler(this.button_stop_Click);
             // 
             // button_update_desc
             // 
@@ -483,7 +483,6 @@
             this.comboBox_service.Name = "comboBox_service";
             this.comboBox_service.Size = new System.Drawing.Size(78, 21);
             this.comboBox_service.TabIndex = 28;
-            this.comboBox_service.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // checkBox_service_end
             // 
@@ -504,7 +503,6 @@
             this.checkBox_service_start.TabIndex = 2;
             this.checkBox_service_start.Text = "Kytke ilmoitus päälle kun lähetys alkaa";
             this.checkBox_service_start.UseVisualStyleBackColor = true;
-            this.checkBox_service_start.CheckedChanged += new System.EventHandler(this.checkBox_service_start_CheckedChanged);
             // 
             // textBox_service_user
             // 
@@ -547,7 +545,7 @@
             this.Controls.Add(this.textBox_username);
             this.Controls.Add(this.label_password);
             this.Controls.Add(this.label_username);
-            this.Controls.Add(this.webBrowser1);
+            this.Controls.Add(this.webBrowser_retku);
             this.Controls.Add(this.button_login);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
@@ -564,7 +562,7 @@
 
         #endregion
 
-        private System.Windows.Forms.WebBrowser webBrowser1;
+        private System.Windows.Forms.WebBrowser webBrowser_retku;
         private System.Windows.Forms.Button button_timer;
         private System.Windows.Forms.Label label_starting;
         private System.Windows.Forms.Label label_ending;
