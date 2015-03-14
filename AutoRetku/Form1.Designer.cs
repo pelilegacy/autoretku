@@ -55,7 +55,7 @@
             this.timer_refresh = new System.Windows.Forms.Timer(this.components);
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.comboBox_service = new System.Windows.Forms.ComboBox();
             this.checkBox_service_end = new System.Windows.Forms.CheckBox();
             this.checkBox_service_start = new System.Windows.Forms.CheckBox();
             this.textBox_service_user = new System.Windows.Forms.TextBox();
@@ -461,7 +461,7 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.comboBox1);
+            this.groupBox1.Controls.Add(this.comboBox_service);
             this.groupBox1.Controls.Add(this.checkBox_service_end);
             this.groupBox1.Controls.Add(this.checkBox_service_start);
             this.groupBox1.Controls.Add(this.textBox_service_user);
@@ -472,18 +472,18 @@
             this.groupBox1.TabIndex = 27;
             this.groupBox1.TabStop = false;
             // 
-            // comboBox1
+            // comboBox_service
             // 
-            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
+            this.comboBox_service.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox_service.FormattingEnabled = true;
+            this.comboBox_service.Items.AddRange(new object[] {
             "Twitch",
             "Hitbox"});
-            this.comboBox1.Location = new System.Drawing.Point(8, 0);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(78, 21);
-            this.comboBox1.TabIndex = 28;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.comboBox_service.Location = new System.Drawing.Point(8, 0);
+            this.comboBox_service.Name = "comboBox_service";
+            this.comboBox_service.Size = new System.Drawing.Size(78, 21);
+            this.comboBox_service.TabIndex = 28;
+            this.comboBox_service.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // checkBox_service_end
             // 
@@ -593,7 +593,7 @@
         private System.Windows.Forms.CheckBox checkBox_service_start;
         private System.Windows.Forms.TextBox textBox_service_user;
         private System.Windows.Forms.Label label_service_user;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox comboBox_service;
     }
 }
 

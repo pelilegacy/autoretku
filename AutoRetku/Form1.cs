@@ -304,7 +304,7 @@ namespace AutoRetku
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (comboBox1.SelectedIndex == 0)
+            if (comboBox_service.SelectedIndex == 0)
             {
                 useTwitch = true;
             }
@@ -344,59 +344,52 @@ namespace AutoRetku
 
         private void worker_service_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if (runTwitch == true)
+            if (isStartOnOnline()) // if checkBox_service_start is checked
             {
-                string source = GetSource("https://api.twitch.tv/kraken/streams?channel=" + service_user);
-
-                if (checkBox_service_start.Checked == true)
+                if (selectedService() == 1) // if selected service is Twitch
                 {
-                    if (source.Contains("\"status\""))
+                    if (isLive(1, textBox_service_user.Text)) // if Twitch is Live
                     {
-                        webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=2");
-                        pictureBox1.Image = AutoRetku.Properties.Resources.green;
+                        setRetkuOn();
                     }
-                    else
+                }
+                else if (selectedService() == 2) // if selected service is Hitbox
+                {
+                    if (isLive(2, textBox_service_user.Text)) // if Hitbox is Live
                     {
-                        if (checkBox_service_end.Checked == true)
-                        {
-                            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=0");
-                            pictureBox1.Image = AutoRetku.Properties.Resources.red;
-                        }
+                        setRetkuOn();
+                    }
+                }
+            }
+            
+            if (isStopOnOffline())  // if checkBox_service_end is checked
+            {
+                if (selectedService() == 1) // if selected service is Twitch
+                {
+                    if (!isLive(1, textBox_service_user.Text)) // if Twitch is Live
+                    {
+                        setRetkuOff();
+                    }
+                }
+                else if (selectedService() == 2) // if selected service is Hitbox
+                {
+                    if (!isLive(2, textBox_service_user.Text)) // if Hitbox is Live
+                    {
+                        setRetkuOff();
                     }
                 }
             }
 
-            if (runHitbox == true)
-            {
-                string source = GetSource("http://api.hitbox.tv/media/live/" + service_user);
-
-                if (checkBox_service_start.Checked == true)
-                {
-                    if (source.Contains("\"media_is_live\":\"1\""))
-                    {
-                        webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=2");
-                        pictureBox1.Image = AutoRetku.Properties.Resources.green;
-                    }
-                    else
-                    {
-                        if (checkBox_service_end.Checked == true)
-                        {
-                            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=0");
-                            pictureBox1.Image = AutoRetku.Properties.Resources.red;
-                        }
-                    }
-                }
-            }
             worker_streamsvc.RunWorkerAsync();
         }
 
-        public Boolean isLive(int serviceid, string service_user)
+        public Boolean isLive(int serviceid, string service_user) // 1 = Twitch, 2 = Hitbox, service_user = username at streaming service
         {
             if (serviceid == 1)
             {
-                string source = GetSource("https://api.twitch.tv/kraken/streams?channel=" + service_user);
+                string source = GetSource("https://api.twitch.tv/kraken/streams?channel=" + service_user); // Get json source code from Twitch API
 
-                if (source.Contains("\"status\""))
+                if (source.Contains("\"status\"")) // If "status" exists in json, stream is Live
                 {
                     return true;
                 }
@@ -404,15 +397,62 @@ namespace AutoRetku
 
             if (serviceid == 2)
             {
-                string source = GetSource("http://api.hitbox.tv/media/live/" + service_user);
+                string source = GetSource("http://api.hitbox.tv/media/live/" + service_user); // Get json source code from Hitbox API
 
-                if (source.Contains("\"media_is_live\":\"1\""))
+                if (source.Contains("\"media_is_live\":\"1\"")) // If media_is_live":"1" exists in json, stream is Live
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        public int selectedService()
+        {
+            if (comboBox_service.SelectedIndex == 0) // if Dropbox's selected item's index is 0 = Twitch
+            {
+                return 1;
+            }
+
+            if (comboBox_service.SelectedIndex == 1) // if Dropbox's selected item's index is 1 = Hitbox
+            {
+                return 2;
+            }
+
+            return 0;
+        }
+
+        public Boolean isStartOnOnline() // Check if user wants to start Retku when stream goes Live
+        {
+            if (checkBox_service_start.Checked == true) // if Checkbox is checked
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public Boolean isStopOnOffline() // Check if user wants to start Retku when stream goes Live
+        {
+            if (checkBox_service_end.Checked == true) // if Checkbox is checked
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        public void setRetkuOn()
+        {
+            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=2"); // Navigate web browser control to url
+            pictureBox1.Image = AutoRetku.Properties.Resources.green; // Set notification image to green.png
+        }
+
+        public void setRetkuOff()
+        {
+            webBrowser1.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=0"); // Navigate web browser control to url
+            pictureBox1.Image = AutoRetku.Properties.Resources.red;  // Set notification image to red.png
         }
     }
 }
