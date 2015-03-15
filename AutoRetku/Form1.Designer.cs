@@ -72,7 +72,6 @@
             this.webBrowser_retku.Name = "webBrowser_retku";
             this.webBrowser_retku.Size = new System.Drawing.Size(98, 99);
             this.webBrowser_retku.TabIndex = 0;
-            this.webBrowser_retku.Url = new System.Uri("http://www.nesretku.com/index.php", System.UriKind.Absolute);
             this.webBrowser_retku.Visible = false;
             this.webBrowser_retku.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_retku_DocumentCompleted);
             // 

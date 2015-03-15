@@ -28,8 +28,8 @@ namespace AutoRetku
         public Boolean allowServiceChange = false;
 
         public string retrieved_status;
-        public string username = "";
-        public string password = "";
+        private string username = "";
+        private string password = "";
         public string log = "";
 
         public string service_user;
@@ -123,22 +123,11 @@ namespace AutoRetku
             password = textBox_password.Text;
             service_user = textBox_service_user.Text;
 
+            webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
+
             if (textBox_service_user.Text == "")
             {
                 worker_streamsvc.RunWorkerAsync();
-            }
-
-            if (logged == false)
-            {
-                HtmlElementCollection input;
-                HtmlElement input_username, input_password, login;
-                input = webBrowser_retku.Document.GetElementsByTagName("input");
-                input_username = input["username"];
-                input_password = input["password"];
-                login = input["login"];
-                input_username.SetAttribute("value", username);
-                input_password.SetAttribute("value", password);
-                login.InvokeMember("click");
             }
         }
 
@@ -148,6 +137,68 @@ namespace AutoRetku
             retkuLogOut();
             e.Cancel = false;
             Application.Exit();
+        }
+
+        private void comboBox_service_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (allowServiceChange)
+            {
+                HtmlElementCollection select, input;
+                HtmlElement service_option, save;
+                select = webBrowser_retku.Document.GetElementsByTagName("select");
+                input = webBrowser_retku.Document.GetElementsByTagName("input");
+                service_option = select["palvelin"];
+                save = input["userConfSubmit"];
+
+                if (selectedService() == 1)
+                {
+                    service_option.SetAttribute("value", "3");
+                }
+                else if (selectedService() == 2)
+                {
+                    service_option.SetAttribute("value", "5");
+                }
+
+                save.InvokeMember("click");
+            }
+            else
+            {
+                allowServiceChange = true;
+            }
+        }
+
+        private void button_retrievedesc_Click(object sender, EventArgs e)
+        {
+            service_user = textBox_service_user.Text;
+            if (service_user != "")
+            {
+                if (selectedService() == 1)
+                {
+                    string source = GetSource("https://api.twitch.tv/kraken/channels/" + service_user); // Get json source code from Twitch API
+
+                    if (source != "")
+                    {
+                        if (source.Contains("\"status\"")) // If "status" exists in json, stream is Live
+                        {
+                            retrieved_status = stringBetween(source, "status\":\"", "\"");
+                        }
+                    }
+                }
+                else if (selectedService() == 2)
+                {
+                    string source = GetSource("http://api.hitbox.tv/media/user/" + service_user); // Get json source code from Hitbox API
+
+                    if (source != "")
+                    {
+                        if (source.Contains("\"media_status\"")) // If media_is_live":"1" exists in json, stream is Live
+                        {
+                            retrieved_status = stringBetween(source, "media_status\":\"", "\"");
+                        }
+                    }
+                }
+
+                textBox_desc.Text = retrieved_status;
+            }
         }
 
         #endregion
@@ -163,7 +214,7 @@ namespace AutoRetku
         {
             if (logged == true)
             {
-                if (webBrowser_retku.Url == new Uri("http://www.nesretku.com/index.php"))
+                if (webBrowser_retku.Url != new Uri("http://www.nesretku.com/index.php?user=" + username))
                 {
                     webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
                 }
@@ -330,11 +381,24 @@ namespace AutoRetku
                         backgroundWorker1.RunWorkerAsync();
                     }
                 }
+
+                if (logged == false)
+                {
+                    HtmlElementCollection input;
+                    HtmlElement input_username, input_password, login;
+                    input = webBrowser_retku.Document.GetElementsByTagName("input");
+                    input_username = input["username"];
+                    input_password = input["password"];
+                    login = input["login"];
+                    input_username.SetAttribute("value", username);
+                    input_password.SetAttribute("value", password);
+                    login.InvokeMember("click");
+                }
             }
 
-            if (logged == false && webBrowser_retku.Url != new Uri("http://www.nesretku.com/index.php"))
+            if (logged == false && webBrowser_retku.Url != new Uri("http://www.nesretku.com/index.php?user=" + username))
             {
-                webBrowser_retku.Navigate("http://www.nesretku.com/index.php");
+                webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
             }
         }
 
@@ -342,7 +406,7 @@ namespace AutoRetku
 
         #region Own functions
 
-        public void retkuLogOut()
+        private void retkuLogOut()
         {
             try
             {
@@ -355,7 +419,7 @@ namespace AutoRetku
             }
         }
 
-        public void CheckStatus()
+        private void CheckStatus()
         {
             if (webBrowser_retku.DocumentText.Contains("alt=\"Kiinni\""))
             {
@@ -442,7 +506,7 @@ namespace AutoRetku
             return false;
         }
 
-        public void setRetkuStatus(int status) // 2 = Online, 1 = Paused, 0 = Offline
+        private void setRetkuStatus(int status) // 2 = Online, 1 = Paused, 0 = Offline
         {
             webBrowser_retku.Navigate("http://www.nesretku.com/cmd/stream_switch.php?back=/index.php?user=" + username + "&switch=" + status); // Navigate web browser control to url
         }
@@ -483,68 +547,5 @@ namespace AutoRetku
         }
 
         #endregion
-
-        private void button_retrievedesc_Click(object sender, EventArgs e)
-        {
-            service_user = textBox_service_user.Text;
-            if (service_user != "")
-            {
-                if (selectedService() == 1)
-                {
-                    string source = GetSource("https://api.twitch.tv/kraken/streams?channel=" + service_user); // Get json source code from Twitch API
-
-                    if (source != "")
-                    {
-                        if (source.Contains("\"status\"")) // If "status" exists in json, stream is Live
-                        {
-                            retrieved_status = stringBetween(source, "\"status\":\"", "\"");
-                        }
-                    }
-                }
-                else if (selectedService() == 2)
-                {
-                    string source = GetSource("http://api.hitbox.tv/media/live/" + service_user); // Get json source code from Hitbox API
-
-                    if (source != "")
-                    {
-                        if (source.Contains("\"media_is_live\":\"1\"")) // If media_is_live":"1" exists in json, stream is Live
-                        {
-                            retrieved_status = stringBetween(source, "\"status\":\"", "\"");
-                        }
-                    }
-                }
-
-                textBox_desc.Text = retrieved_status;
-            }
-        }
-
-        private void comboBox_service_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (allowServiceChange)
-            {
-                HtmlElementCollection select, input;
-                HtmlElement service_option, save;
-                select = webBrowser_retku.Document.GetElementsByTagName("select");
-                input = webBrowser_retku.Document.GetElementsByTagName("input");
-                service_option = select["palvelin"];
-                save = input["userConfSubmit"];
-
-                if (selectedService() == 1)
-                {
-                    service_option.SetAttribute("value", "3");
-                }
-                else if (selectedService() == 2)
-                {
-                    service_option.SetAttribute("value", "5");
-                }
-
-                save.InvokeMember("click");
-            }
-            else
-            {
-                allowServiceChange = true;
-            }
-        }
-
     }
 }
