@@ -78,6 +78,12 @@ namespace AutoRetku
                 if (timerRunning == false)
                 {
                     button_timer.Text = "Pysäytä";
+
+                    checkBox_service_start.Checked = false;
+                    checkBox_service_end.Checked = false;
+                    checkBox_service_start.Enabled = false;
+                    checkBox_service_end.Enabled = false;
+
                     timerRunning = true;
 
                     timer_refresh.Start();
@@ -85,6 +91,10 @@ namespace AutoRetku
                 else
                 {
                     button_timer.Text = "Ajasta";
+
+                    checkBox_service_start.Enabled = true;
+                    checkBox_service_end.Enabled = true;
+
                     timerRunning = false;
                 }
             }
@@ -118,6 +128,7 @@ namespace AutoRetku
 
         private void button_login_Click(object sender, EventArgs e)
         {
+            button_login.Enabled = false;
             username = textBox_username.Text;
             password = textBox_password.Text;
             service_user = textBox_service_user.Text;
@@ -126,7 +137,10 @@ namespace AutoRetku
 
             if (textBox_service_user.Text == "")
             {
-                worker_streamsvc.RunWorkerAsync();
+                if (!worker_streamsvc.IsBusy)
+                {
+                    worker_streamsvc.RunWorkerAsync();
+                }
             }
         }
 
@@ -196,12 +210,12 @@ namespace AutoRetku
 
         #region BackgroundWorker Events
 
-        private void backgroundWorker1_DoWork(object sender, DoWorkEventArgs e)
+        private void worker_retku_DoWork(object sender, DoWorkEventArgs e)
         {
             System.Threading.Thread.Sleep(1000);
         }
 
-        private void backgroundWorker1_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        private void worker_retku_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             if (logged == true)
             {
@@ -240,7 +254,8 @@ namespace AutoRetku
                     }
                 }
             }
-            backgroundWorker1.RunWorkerAsync();
+
+            worker_retku.RunWorkerAsync();
         }
 
         private void worker_service_DoWork(object sender, DoWorkEventArgs e)  // worker_service_RunWorkerCompleted runs after this thread finishes.
@@ -250,21 +265,25 @@ namespace AutoRetku
 
         private void worker_service_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) //  Running in background to monitor and edit stream status
         {
+            service_user = textBox_service_user.Text;
+
             if (textBox_service_user.Text != "")
             {
                 if (isStartOnOnline() && notificationStatus == 0) // if checkBox_service_start is checked
                 {
                     if (selectedService() == 1) // if selected service is Twitch
                     {
-                        if (isLive(1, textBox_service_user.Text)) // if Twitch is Live
+                        if (isLive(1, service_user)) // if Twitch is Live
                         {
+                            comboBox_service.Enabled = false;
                             setRetkuOn();
                         }
                     }
                     else if (selectedService() == 2) // if selected service is Hitbox
                     {
-                        if (isLive(2, textBox_service_user.Text)) // if Hitbox is Live
+                        if (isLive(2, service_user)) // if Hitbox is Live
                         {
+                            comboBox_service.Enabled = false;
                             setRetkuOn();
                         }
                     }
@@ -274,15 +293,17 @@ namespace AutoRetku
                 {
                     if (selectedService() == 1) // if selected service is Twitch
                     {
-                        if (!isLive(1, textBox_service_user.Text)) // if Twitch is Live
+                        if (!isLive(1, service_user)) // if Twitch is Live
                         {
+                            comboBox_service.Enabled = true;
                             setRetkuOff();
                         }
                     }
                     else if (selectedService() == 2) // if selected service is Hitbox
                     {
-                        if (!isLive(2, textBox_service_user.Text)) // if Hitbox is Live
+                        if (!isLive(2, service_user)) // if Hitbox is Live
                         {
+                            comboBox_service.Enabled = true;
                             setRetkuOff();
                         }
                     }
@@ -345,16 +366,19 @@ namespace AutoRetku
                     if (webBrowser_retku.DocumentText.Contains("alt=\"Kiinni\""))
                     {
                         pictureBox1.Image = AutoRetku.Properties.Resources.red;
+                        notificationStatus = 0;
                     }
 
                     if (webBrowser_retku.DocumentText.Contains("alt=\"Tauolla\""))
                     {
                         pictureBox1.Image = AutoRetku.Properties.Resources.yolo;
+                        notificationStatus = 1;
                     }
 
                     if (webBrowser_retku.DocumentText.Contains("alt=\"Päällä\""))
                     {
                         pictureBox1.Image = AutoRetku.Properties.Resources.green;
+                        notificationStatus = 2;
                     }
                     StatusChecked = true;
                 }
@@ -362,7 +386,7 @@ namespace AutoRetku
                 if (workerStarted == false)
                 {
                     workerStarted = true;
-                    backgroundWorker1.RunWorkerAsync();
+                    worker_retku.RunWorkerAsync();
                 }
             }
             else
@@ -381,6 +405,7 @@ namespace AutoRetku
                 input_username.SetAttribute("value", username);
                 input_password.SetAttribute("value", password);
                 login.InvokeMember("click");
+                button_login.Enabled = true;
             }
         }
 

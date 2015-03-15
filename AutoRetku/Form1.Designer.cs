@@ -40,7 +40,7 @@
             this.comboBox_ending_hour = new System.Windows.Forms.ComboBox();
             this.textBox_desc = new System.Windows.Forms.TextBox();
             this.label_desc = new System.Windows.Forms.Label();
-            this.backgroundWorker1 = new System.ComponentModel.BackgroundWorker();
+            this.worker_retku = new System.ComponentModel.BackgroundWorker();
             this.button_start = new System.Windows.Forms.Button();
             this.button_pause = new System.Windows.Forms.Button();
             this.button_stop = new System.Windows.Forms.Button();
@@ -336,10 +336,10 @@
             this.label_desc.Text = "Kuvaus:";
             this.label_desc.Visible = false;
             // 
-            // backgroundWorker1
+            // worker_retku
             // 
-            this.backgroundWorker1.DoWork += new System.ComponentModel.DoWorkEventHandler(this.backgroundWorker1_DoWork);
-            this.backgroundWorker1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.backgroundWorker1_RunWorkerCompleted);
+            this.worker_retku.DoWork += new System.ComponentModel.DoWorkEventHandler(this.worker_retku_DoWork);
+            this.worker_retku.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.worker_retku_RunWorkerCompleted);
             // 
             // button_start
             // 
@@ -584,7 +584,7 @@
         private System.Windows.Forms.ComboBox comboBox_ending_hour;
         private System.Windows.Forms.TextBox textBox_desc;
         private System.Windows.Forms.Label label_desc;
-        private System.ComponentModel.BackgroundWorker backgroundWorker1;
+        private System.ComponentModel.BackgroundWorker worker_retku;
         private System.Windows.Forms.Button button_start;
         private System.Windows.Forms.Button button_pause;
         private System.Windows.Forms.Button button_stop;
