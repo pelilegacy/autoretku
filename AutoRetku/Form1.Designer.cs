@@ -359,7 +359,7 @@
             this.button_pause.Name = "button_pause";
             this.button_pause.Size = new System.Drawing.Size(75, 23);
             this.button_pause.TabIndex = 16;
-            this.button_pause.Text = "Keskeytä";
+            this.button_pause.Text = "Tauko";
             this.button_pause.UseVisualStyleBackColor = true;
             this.button_pause.Visible = false;
             this.button_pause.Click += new System.EventHandler(this.button_pause_Click);

@@ -542,9 +542,12 @@ namespace AutoRetku
 
         public void setRetkuPause()
         {
-            notificationStatus = 1;
-            setRetkuStatus(1);
-            pictureBox1.Image = AutoRetku.Properties.Resources.yolo; // Set notification image to yolo.png
+            if (notificationStatus == 2)
+            {
+                notificationStatus = 1;
+                setRetkuStatus(1);
+                pictureBox1.Image = AutoRetku.Properties.Resources.yolo; // Set notification image to yolo.png
+            }
         }
 
         public void setRetkuOff()
