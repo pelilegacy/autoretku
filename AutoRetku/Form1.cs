@@ -18,18 +18,20 @@ namespace AutoRetku
             InitializeComponent();
         }
 
-        public Boolean timerRunning = false;
-        public Boolean logged = false;
-        public Boolean desc_received = false;
-        public Boolean workerStarted = false;
-        public Boolean StatusChecked = false;
-        public int notificationStatus = 0;
-        public Boolean allowServiceChange = false;
+        private Boolean runonce = false;
+        private Boolean timerRunning = false;
+        private Boolean logged = false;
+        private Boolean desc_received = false;
+        private Boolean workerStarted = false;
+        private Boolean StatusChecked = false;
+        private int notificationStatus = 0;
+        private Boolean allowServiceChange = false;
+        private Boolean allowlogin = false;
 
-        public string retrieved_status;
+        private string retrieved_status;
         private string username = "";
         private string password = "";
-        public string log = "";
+        // private string log = ""; commented logging for later development
 
         public string service_user;
 
@@ -142,6 +144,8 @@ namespace AutoRetku
                     worker_streamsvc.RunWorkerAsync();
                 }
             }
+
+            allowlogin = true;
         }
 
         private void comboBox_service_SelectedIndexChanged(object sender, EventArgs e)
@@ -219,11 +223,6 @@ namespace AutoRetku
         {
             if (logged == true)
             {
-                if (webBrowser_retku.Url != new Uri("http://www.nesretku.com/index.php?user=" + username))
-                {
-                    webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
-                }
-
                 if (timerRunning == true)
                 {
                     DateTime time = DateTime.Now;
@@ -319,93 +318,106 @@ namespace AutoRetku
 
         private void webBrowser_retku_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            if (webBrowser_retku.DocumentText.Contains("Stream tila"))
+            if (webBrowser_retku.Url.ToString() == "http://www.nesretku.com/index.php?user=" + username && username != "")
             {
-                logged = true;
-                this.Height = 255;
-                label_username.Visible = false;
-                label_password.Visible = false;
-                textBox_username.Visible = false;
-                textBox_password.Visible = false;
-                button_login.Visible = false;
-                checkBox_remember.Visible = false;
-
-                button_timer.Visible = true;
-                button_start.Visible = true;
-                button_pause.Visible = true;
-                button_stop.Visible = true;
-                label_starting.Visible = true;
-                label_ending.Visible = true;
-                comboBox_starting_hour.Visible = true;
-                comboBox_starting_minute.Visible = true;
-                comboBox_ending_hour.Visible = true;
-                comboBox_ending_minute.Visible = true;
-                label_desc.Visible = true;
-                textBox_desc.Visible = true;
-                button_update_desc.Visible = true;
-                pictureBox1.Visible = true;
-
-                timer_refresh.Start();
-
-                if (StatusChecked == false)
+                if (webBrowser_retku.DocumentText.Contains("Stream tila"))
                 {
-                    HtmlElementCollection select;
-                    HtmlElement service_option;
-                    select = webBrowser_retku.Document.GetElementsByTagName("select");
-                    service_option = select["palvelin"];
-
-                    if (service_option.GetAttribute("value").ToString() == "3")
+                    if (runonce == false)
                     {
-                        comboBox_service.SelectedIndex = 0;
+                        runonce = true;
+                        retkuLogOut();
                     }
                     else
                     {
-                        comboBox_service.SelectedIndex = 1;
-                    }
+                        logged = true;
+                        this.Height = 255;
+                        label_username.Visible = false;
+                        label_password.Visible = false;
+                        textBox_username.Visible = false;
+                        textBox_password.Visible = false;
+                        button_login.Visible = false;
+                        checkBox_remember.Visible = false;
 
-                    if (webBrowser_retku.DocumentText.Contains("alt=\"Kiinni\""))
-                    {
-                        pictureBox1.Image = AutoRetku.Properties.Resources.red;
-                        notificationStatus = 0;
-                    }
+                        button_timer.Visible = true;
+                        button_start.Visible = true;
+                        button_pause.Visible = true;
+                        button_stop.Visible = true;
+                        label_starting.Visible = true;
+                        label_ending.Visible = true;
+                        comboBox_starting_hour.Visible = true;
+                        comboBox_starting_minute.Visible = true;
+                        comboBox_ending_hour.Visible = true;
+                        comboBox_ending_minute.Visible = true;
+                        label_desc.Visible = true;
+                        textBox_desc.Visible = true;
+                        button_update_desc.Visible = true;
+                        pictureBox1.Visible = true;
 
-                    if (webBrowser_retku.DocumentText.Contains("alt=\"Tauolla\""))
-                    {
-                        pictureBox1.Image = AutoRetku.Properties.Resources.yolo;
-                        notificationStatus = 1;
-                    }
+                        timer_refresh.Start();
 
-                    if (webBrowser_retku.DocumentText.Contains("alt=\"Päällä\""))
-                    {
-                        pictureBox1.Image = AutoRetku.Properties.Resources.green;
-                        notificationStatus = 2;
+                        if (StatusChecked == false)
+                        {
+                            HtmlElementCollection select;
+                            HtmlElement service_option;
+                            select = webBrowser_retku.Document.GetElementsByTagName("select");
+                            service_option = select["palvelin"];
+
+                            if (service_option.GetAttribute("value").ToString() == "3")
+                            {
+                                comboBox_service.SelectedIndex = 0;
+                            }
+                            else
+                            {
+                                comboBox_service.SelectedIndex = 1;
+                            }
+
+                            if (webBrowser_retku.DocumentText.Contains("alt=\"Kiinni\""))
+                            {
+                                pictureBox1.Image = AutoRetku.Properties.Resources.red;
+                                notificationStatus = 0;
+                            }
+
+                            if (webBrowser_retku.DocumentText.Contains("alt=\"Tauolla\""))
+                            {
+                                pictureBox1.Image = AutoRetku.Properties.Resources.yolo;
+                                notificationStatus = 1;
+                            }
+
+                            if (webBrowser_retku.DocumentText.Contains("alt=\"Päällä\""))
+                            {
+                                pictureBox1.Image = AutoRetku.Properties.Resources.green;
+                                notificationStatus = 2;
+                            }
+                            StatusChecked = true;
+                        }
+
+                        if (workerStarted == false)
+                        {
+                            workerStarted = true;
+                            worker_retku.RunWorkerAsync();
+                        }
                     }
-                    StatusChecked = true;
                 }
-
-                if (workerStarted == false)
+                else
                 {
-                    workerStarted = true;
-                    worker_retku.RunWorkerAsync();
+                    if (allowlogin && !logged)
+                    {
+                        HtmlElementCollection input;
+                        HtmlElement input_username, input_password, login;
+                        input = webBrowser_retku.Document.GetElementsByTagName("input");
+                        input_username = input["username"];
+                        input_password = input["password"];
+                        login = input["login"];
+                        input_username.SetAttribute("value", username);
+                        input_password.SetAttribute("value", password);
+                        login.InvokeMember("click");
+                        button_login.Enabled = true;
+                    }
                 }
             }
-            else
+            else if (webBrowser_retku.Url.ToString() != "http://www.nesretku.com/index.php?user=" + username && username != "")
             {
-                if (webBrowser_retku.Url != new Uri("http://www.nesretku.com/index.php?user=" + username))
-                {
-                    webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
-                }
-
-                HtmlElementCollection input;
-                HtmlElement input_username, input_password, login;
-                input = webBrowser_retku.Document.GetElementsByTagName("input");
-                input_username = input["username"];
-                input_password = input["password"];
-                login = input["login"];
-                input_username.SetAttribute("value", username);
-                input_password.SetAttribute("value", password);
-                login.InvokeMember("click");
-                button_login.Enabled = true;
+                webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
             }
         }
 

@@ -67,12 +67,12 @@
             // 
             // webBrowser_retku
             // 
-            this.webBrowser_retku.Location = new System.Drawing.Point(349, 155);
+            this.webBrowser_retku.Location = new System.Drawing.Point(15, 212);
             this.webBrowser_retku.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser_retku.Name = "webBrowser_retku";
-            this.webBrowser_retku.Size = new System.Drawing.Size(98, 99);
+            this.webBrowser_retku.Size = new System.Drawing.Size(594, 240);
             this.webBrowser_retku.TabIndex = 0;
-            this.webBrowser_retku.Visible = false;
+            this.webBrowser_retku.Url = new System.Uri("", System.UriKind.Relative);
             this.webBrowser_retku.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_retku_DocumentCompleted);
             // 
             // button_timer
@@ -536,7 +536,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(451, 83);
+            this.ClientSize = new System.Drawing.Size(630, 464);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.button_update_desc);
