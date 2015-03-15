@@ -104,6 +104,9 @@ namespace AutoRetku
 
         private void button_stop_Click(object sender, EventArgs e)
         {
+            comboBox_service.Enabled = true;
+            checkBox_service_start.Checked = false;
+            checkBox_service_end.Checked = false;
             setRetkuOff();
         }
 

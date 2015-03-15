@@ -73,6 +73,7 @@
             this.webBrowser_retku.Size = new System.Drawing.Size(594, 240);
             this.webBrowser_retku.TabIndex = 0;
             this.webBrowser_retku.Url = new System.Uri("", System.UriKind.Relative);
+            this.webBrowser_retku.Visible = false;
             this.webBrowser_retku.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_retku_DocumentCompleted);
             // 
             // button_timer
@@ -536,7 +537,9 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(630, 464);
+            this.ClientSize = new System.Drawing.Size(452, 81);
+            this.Controls.Add(this.checkBox_remember);
+            this.Controls.Add(this.button_login);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.button_update_desc);
@@ -552,13 +555,11 @@
             this.Controls.Add(this.label_ending);
             this.Controls.Add(this.label_starting);
             this.Controls.Add(this.button_timer);
-            this.Controls.Add(this.checkBox_remember);
             this.Controls.Add(this.textBox_password);
             this.Controls.Add(this.textBox_username);
             this.Controls.Add(this.label_password);
             this.Controls.Add(this.label_username);
             this.Controls.Add(this.webBrowser_retku);
-            this.Controls.Add(this.button_login);
             this.Cursor = System.Windows.Forms.Cursors.Default;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
