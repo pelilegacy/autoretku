@@ -401,7 +401,7 @@ namespace AutoRetku
                         }
                     }
                 }
-                else
+                else if (webBrowser_retku.DocumentText.Contains("name=\"login\""))
                 {
                     if (allowlogin && !logged)
                     {
@@ -418,9 +418,24 @@ namespace AutoRetku
                     }
                 }
             }
-            else if (webBrowser_retku.Url.ToString() != "http://www.nesretku.com/index.php?user=" + username && username != "")
+            else if (webBrowser_retku.DocumentText.Contains("Olet yrittänyt kirjautua sisään liian monta kertaa."))
             {
-                webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
+                MessageBox.Show("Olet yrittänyt kirjautua sisään virheellisesti liian monta kertaa. Vahvista kirjautuminen selaimella ja yritä sen jälkeen uudelleen.");
+                //label_loginmsg.Text = "Failed too many times";
+                label_loginmsg.Text = "Kirjautuminen epäonnistui";
+                allowlogin = false;
+                textBox_username.Text = "";
+                textBox_password.Text = "";
+                button_login.Enabled = true;
+                Process.Start("iexplore.exe", "http://www.nesretku.com/phpBB3/ucp.php?mode=login");
+            }
+            else if (webBrowser_retku.DocumentText.Contains("Olet antanut väärän käyttäjätunnuksen") || webBrowser_retku.DocumentText.Contains("Olet antanut väärän salasanan."))
+            {
+                label_loginmsg.Text = "Kirjautuminen epäonnistui";
+                allowlogin = false;
+                textBox_username.Text = "";
+                textBox_password.Text = "";
+                button_login.Enabled = true;
             }
         }
 

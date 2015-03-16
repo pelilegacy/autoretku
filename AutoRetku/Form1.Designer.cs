@@ -61,6 +61,7 @@
             this.checkBox_service_start = new System.Windows.Forms.CheckBox();
             this.textBox_service_user = new System.Windows.Forms.TextBox();
             this.label_service_user = new System.Windows.Forms.Label();
+            this.label_loginmsg = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -70,10 +71,9 @@
             this.webBrowser_retku.Location = new System.Drawing.Point(15, 212);
             this.webBrowser_retku.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser_retku.Name = "webBrowser_retku";
-            this.webBrowser_retku.Size = new System.Drawing.Size(594, 240);
+            this.webBrowser_retku.Size = new System.Drawing.Size(425, 240);
             this.webBrowser_retku.TabIndex = 0;
             this.webBrowser_retku.Url = new System.Uri("", System.UriKind.Relative);
-            this.webBrowser_retku.Visible = false;
             this.webBrowser_retku.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_retku_DocumentCompleted);
             // 
             // button_timer
@@ -533,11 +533,20 @@
             this.label_service_user.TabIndex = 0;
             this.label_service_user.Text = "Käyttäjätunnus:";
             // 
+            // label_loginmsg
+            // 
+            this.label_loginmsg.AutoSize = true;
+            this.label_loginmsg.Location = new System.Drawing.Point(189, 62);
+            this.label_loginmsg.Name = "label_loginmsg";
+            this.label_loginmsg.Size = new System.Drawing.Size(0, 13);
+            this.label_loginmsg.TabIndex = 28;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(452, 81);
+            this.ClientSize = new System.Drawing.Size(452, 466);
+            this.Controls.Add(this.label_loginmsg);
             this.Controls.Add(this.checkBox_remember);
             this.Controls.Add(this.button_login);
             this.Controls.Add(this.groupBox1);
@@ -606,6 +615,7 @@
         private System.Windows.Forms.Label label_service_user;
         private System.Windows.Forms.ComboBox comboBox_service;
         private System.Windows.Forms.Button button_retrievedesc;
+        private System.Windows.Forms.Label label_loginmsg;
     }
 }
 
