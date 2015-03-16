@@ -18,6 +18,8 @@ namespace AutoRetku
             InitializeComponent();
         }
 
+        private Boolean startlogin = false;
+
         private Boolean runonce = false;
         private Boolean timerRunning = false;
         private Boolean logged = false;
@@ -26,7 +28,6 @@ namespace AutoRetku
         private Boolean StatusChecked = false;
         private int notificationStatus = 0;
         private Boolean allowServiceChange = false;
-        private Boolean allowlogin = false;
 
         private string retrieved_status;
         private string username = "";
@@ -34,6 +35,149 @@ namespace AutoRetku
         // private string log = ""; commented logging for later development
 
         public string service_user;
+
+        private void webBrowser_retku_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            string currentUrl = webBrowser_retku.Url.ToString();
+            string documentText = webBrowser_retku.DocumentText;
+
+            if (startlogin && currentUrl == "http://www.nesretku.com/index.php?user=" + username)
+            {
+                if (documentText.Contains("Stream tila"))
+                {
+                    Debug.WriteLine("Logging out");
+                    retkuLogOut();
+                }
+
+                startlogin = false;
+                Debug.WriteLine("Logging in");
+                HtmlElementCollection input;
+                HtmlElement input_username, input_password, login;
+                input = webBrowser_retku.Document.GetElementsByTagName("input");
+                input_username = input["username"];
+                input_password = input["password"];
+                login = input["login"];
+                input_username.SetAttribute("value", username);
+                input_password.SetAttribute("value", password);
+                login.InvokeMember("click");
+            }
+            else if (documentText.Contains("Stream tila") && logged == false)
+            {
+                Debug.WriteLine("Logged in");
+                logged = true;
+            }
+
+            if (currentUrl == "http://www.nesretku.com/phpBB3/ucp.php?mode=login")
+            {
+                Debug.WriteLine("Moved to http://www.nesretku.com/phpBB3/ucp.php?mode=login");
+                if (documentText.Contains("Olet antanut väärän salasanan."))
+	            {
+                    Debug.WriteLine("Olet antanut väärän salasanan.");
+                    label_loginmsg.Text = "Olet antanut väärän salasanan.";
+	            }
+                else if (documentText.Contains("Olet antanut väärän käyttäjätunnuksen."))
+	            {
+                    Debug.WriteLine("Olet antanut väärän käyttäjätunnuksen.");
+                    label_loginmsg.Text = "Olet antanut väärän käyttäjätunnuksen.";
+	            }
+            }
+            
+            if (logged == true)
+            {
+                Debug.WriteLine("Running after logged");
+
+                if (currentUrl != "http://www.nesretku.com/index.php?user=" + username)
+                {
+                    Debug.WriteLine("Redirecting to http://www.nesretku.com/index.php?user=" + username);
+                    webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
+                }
+
+                if (!runonce)
+                {
+                    runonce = true;
+                    this.Height = 295;
+                    label_username.Visible = false;
+                    label_password.Visible = false;
+                    textBox_username.Visible = false;
+                    textBox_password.Visible = false;
+                    button_login.Visible = false;
+                    checkBox_remember.Visible = false;
+
+                    button_timer.Visible = true;
+                    button_start.Visible = true;
+                    button_pause.Visible = true;
+                    button_stop.Visible = true;
+                    label_starting.Visible = true;
+                    label_ending.Visible = true;
+                    comboBox_starting_hour.Visible = true;
+                    comboBox_starting_minute.Visible = true;
+                    comboBox_ending_hour.Visible = true;
+                    comboBox_ending_minute.Visible = true;
+                    label_desc.Visible = true;
+                    textBox_desc.Visible = true;
+                    button_update_desc.Visible = true;
+                    pictureBox1.Visible = true;
+
+                    timer_refresh.Start();
+                }
+
+                if (StatusChecked == false)
+                {
+                    Debug.WriteLine("Checking status & service");
+                    HtmlElementCollection select, input;
+                    HtmlElement service_option, desc;
+                    select = webBrowser_retku.Document.GetElementsByTagName("select");
+                    input = webBrowser_retku.Document.GetElementsByTagName("input");
+                    service_option = select["palvelin"];
+                    desc = input["kuvaus"];
+                    textBox_desc.Text = desc.GetAttribute("value");
+
+                    if (service_option.GetAttribute("value").ToString() == "3")
+                    {
+                        Debug.WriteLine("Setting status to Twitch");
+                        comboBox_service.SelectedIndex = 0;
+                    }
+                    else
+                    {
+                        Debug.WriteLine("Setting status to Hitbox");
+                        comboBox_service.SelectedIndex = 1;
+                    }
+
+                    if (documentText.Contains("alt=\"Kiinni\""))
+                    {
+                        Debug.WriteLine("Setting status to red");
+                        pictureBox1.Image = AutoRetku.Properties.Resources.red;
+                        notificationStatus = 0;
+                    }
+
+                    if (documentText.Contains("alt=\"Tauolla\""))
+                    {
+                        Debug.WriteLine("Setting status to yellow");
+                        pictureBox1.Image = AutoRetku.Properties.Resources.yolo;
+                        notificationStatus = 1;
+                    }
+
+                    if (documentText.Contains("alt=\"Päällä\""))
+                    {
+                        Debug.WriteLine("Setting status to green");
+                        pictureBox1.Image = AutoRetku.Properties.Resources.green;
+                        notificationStatus = 2;
+                    }
+                    StatusChecked = true;
+                }
+
+                if (workerStarted == false)
+                {
+                    Debug.WriteLine("Starting worker_retku");
+                    workerStarted = true;
+                    worker_retku.RunWorkerAsync();
+                }
+            }
+            else
+            {
+                Debug.WriteLine(webBrowser_retku.Url.ToString());
+            }
+        }
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -133,22 +277,14 @@ namespace AutoRetku
 
         private void button_login_Click(object sender, EventArgs e)
         {
+            Debug.WriteLine("Clicked login");
             button_login.Enabled = false;
             username = textBox_username.Text;
             password = textBox_password.Text;
-            service_user = textBox_service_user.Text;
+
+            startlogin = true;
 
             webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
-
-            if (textBox_service_user.Text == "")
-            {
-                if (!worker_streamsvc.IsBusy)
-                {
-                    worker_streamsvc.RunWorkerAsync();
-                }
-            }
-
-            allowlogin = true;
         }
 
         private void comboBox_service_SelectedIndexChanged(object sender, EventArgs e)
@@ -219,7 +355,7 @@ namespace AutoRetku
 
         private void worker_retku_DoWork(object sender, DoWorkEventArgs e)
         {
-            System.Threading.Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(3000);
         }
 
         private void worker_retku_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -240,19 +376,6 @@ namespace AutoRetku
                     if ((time.ToString("HH") == comboBox_ending_hour.Text) && (time.ToString("mm") == comboBox_ending_minute.Text))
                     {
                         setRetkuOff();
-                    }
-                }
-
-                if (webBrowser_retku.Url == new Uri("http://www.nesretku.com/index.php?user=" + username))
-                {
-                    if (desc_received == false)
-                    {
-                        desc_received = true;
-                        HtmlElementCollection input;
-                        HtmlElement desc;
-                        input = webBrowser_retku.Document.GetElementsByTagName("input");
-                        desc = input["kuvaus"];
-                        textBox_desc.Text = desc.GetAttribute("value");
                     }
                 }
             }
@@ -312,132 +435,14 @@ namespace AutoRetku
                 }
             }
 
-            worker_streamsvc.RunWorkerAsync();
+            worker_service.RunWorkerAsync();
         }
 
         #endregion
 
         #region webBrowser events
 
-        private void webBrowser_retku_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-            if (webBrowser_retku.Url.ToString() == "http://www.nesretku.com/index.php?user=" + username && username != "")
-            {
-                if (webBrowser_retku.DocumentText.Contains("Stream tila"))
-                {
-                    if (runonce == false)
-                    {
-                        runonce = true;
-                        retkuLogOut();
-                    }
-                    else
-                    {
-                        logged = true;
-                        this.Height = 255;
-                        label_username.Visible = false;
-                        label_password.Visible = false;
-                        textBox_username.Visible = false;
-                        textBox_password.Visible = false;
-                        button_login.Visible = false;
-                        checkBox_remember.Visible = false;
-
-                        button_timer.Visible = true;
-                        button_start.Visible = true;
-                        button_pause.Visible = true;
-                        button_stop.Visible = true;
-                        label_starting.Visible = true;
-                        label_ending.Visible = true;
-                        comboBox_starting_hour.Visible = true;
-                        comboBox_starting_minute.Visible = true;
-                        comboBox_ending_hour.Visible = true;
-                        comboBox_ending_minute.Visible = true;
-                        label_desc.Visible = true;
-                        textBox_desc.Visible = true;
-                        button_update_desc.Visible = true;
-                        pictureBox1.Visible = true;
-
-                        timer_refresh.Start();
-
-                        if (StatusChecked == false)
-                        {
-                            HtmlElementCollection select;
-                            HtmlElement service_option;
-                            select = webBrowser_retku.Document.GetElementsByTagName("select");
-                            service_option = select["palvelin"];
-
-                            if (service_option.GetAttribute("value").ToString() == "3")
-                            {
-                                comboBox_service.SelectedIndex = 0;
-                            }
-                            else
-                            {
-                                comboBox_service.SelectedIndex = 1;
-                            }
-
-                            if (webBrowser_retku.DocumentText.Contains("alt=\"Kiinni\""))
-                            {
-                                pictureBox1.Image = AutoRetku.Properties.Resources.red;
-                                notificationStatus = 0;
-                            }
-
-                            if (webBrowser_retku.DocumentText.Contains("alt=\"Tauolla\""))
-                            {
-                                pictureBox1.Image = AutoRetku.Properties.Resources.yolo;
-                                notificationStatus = 1;
-                            }
-
-                            if (webBrowser_retku.DocumentText.Contains("alt=\"Päällä\""))
-                            {
-                                pictureBox1.Image = AutoRetku.Properties.Resources.green;
-                                notificationStatus = 2;
-                            }
-                            StatusChecked = true;
-                        }
-
-                        if (workerStarted == false)
-                        {
-                            workerStarted = true;
-                            worker_retku.RunWorkerAsync();
-                        }
-                    }
-                }
-                else if (webBrowser_retku.DocumentText.Contains("name=\"login\""))
-                {
-                    if (allowlogin && !logged)
-                    {
-                        HtmlElementCollection input;
-                        HtmlElement input_username, input_password, login;
-                        input = webBrowser_retku.Document.GetElementsByTagName("input");
-                        input_username = input["username"];
-                        input_password = input["password"];
-                        login = input["login"];
-                        input_username.SetAttribute("value", username);
-                        input_password.SetAttribute("value", password);
-                        login.InvokeMember("click");
-                        button_login.Enabled = true;
-                    }
-                }
-            }
-            else if (webBrowser_retku.DocumentText.Contains("Olet yrittänyt kirjautua sisään liian monta kertaa."))
-            {
-                MessageBox.Show("Olet yrittänyt kirjautua sisään virheellisesti liian monta kertaa. Vahvista kirjautuminen selaimella ja yritä sen jälkeen uudelleen.");
-                //label_loginmsg.Text = "Failed too many times";
-                label_loginmsg.Text = "Kirjautuminen epäonnistui";
-                allowlogin = false;
-                textBox_username.Text = "";
-                textBox_password.Text = "";
-                button_login.Enabled = true;
-                Process.Start("iexplore.exe", "http://www.nesretku.com/phpBB3/ucp.php?mode=login");
-            }
-            else if (webBrowser_retku.DocumentText.Contains("Olet antanut väärän käyttäjätunnuksen") || webBrowser_retku.DocumentText.Contains("Olet antanut väärän salasanan."))
-            {
-                label_loginmsg.Text = "Kirjautuminen epäonnistui";
-                allowlogin = false;
-                textBox_username.Text = "";
-                textBox_password.Text = "";
-                button_login.Enabled = true;
-            }
-        }
+        
 
         #endregion
 
@@ -448,7 +453,11 @@ namespace AutoRetku
             try
             {
                 logged = false;
+                Debug.WriteLine("http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=" + stringBetween(webBrowser_retku.DocumentText, "http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=", "&logout=t&redirect=http://www.nesretku.com/index.php") + "&logout=t&redirect=http://www.nesretku.com/index.php");
                 webBrowser_retku.Navigate("http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=" + stringBetween(webBrowser_retku.DocumentText, "http://www.nesretku.com/phpBB3/ucp.php?mode=logout&sid=", "&logout=t&redirect=http://www.nesretku.com/index.php") + "&logout=t&redirect=http://www.nesretku.com/index.php");
+                System.Threading.Thread.Sleep(1000);
+                Debug.WriteLine("Redirecting to http://www.nesretku.com/index.php?user=" + username);
+                webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
             }
             catch (Exception)
             {
@@ -550,6 +559,7 @@ namespace AutoRetku
 
         public void setRetkuOn()
         {
+            label_statusmsgcontent.Text = "Ilmoitus asetettiin päälle";
             notificationStatus = 2;
             setRetkuStatus(2);
             pictureBox1.Image = AutoRetku.Properties.Resources.green; // Set notification image to green.png
@@ -559,14 +569,20 @@ namespace AutoRetku
         {
             if (notificationStatus == 2)
             {
+                label_statusmsgcontent.Text = "Ilmoitus asetettiin tauolle";
                 notificationStatus = 1;
                 setRetkuStatus(1);
                 pictureBox1.Image = AutoRetku.Properties.Resources.yolo; // Set notification image to yolo.png
+            }
+            else
+            {
+                label_statusmsgcontent.Text = "Taukoa ei voida asettaa";
             }
         }
 
         public void setRetkuOff()
         {
+            label_statusmsgcontent.Text = "Ilmoitus asetettiin pois päältä";
             notificationStatus = 0;
             button_timer.Text = "Ajasta";
             timerRunning = false;
@@ -574,18 +590,36 @@ namespace AutoRetku
             pictureBox1.Image = AutoRetku.Properties.Resources.red;  // Set notification image to red.png
         }
 
-        public void checkNotification()
-        {
-            return;
-        }
-
         public string stringBetween(string str_full, string str_first, string str_second)
         {
-            string[] strparse = str_full.Split(new string[] { str_first }, StringSplitOptions.None);
-            string[] str_return = strparse[1].Split(new string[] { str_second }, StringSplitOptions.None);
-            return str_return[0];
+            try
+            {
+                string[] strparse = str_full.Split(new string[] { str_first }, StringSplitOptions.None);
+                string[] str_return = strparse[1].Split(new string[] { str_second }, StringSplitOptions.None);
+                return str_return[0];
+            }
+            catch (Exception)
+            {
+                return "";
+            }
         }
 
         #endregion
+
+        private void textBox_username_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)13) // Enter pressed
+            {
+                button_login.PerformClick();
+            }
+        }
+
+        private void textBox_password_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (e.KeyChar == (char)13) // Enter pressed
+            {
+                button_login.PerformClick();
+            }
+        }
     }
 }

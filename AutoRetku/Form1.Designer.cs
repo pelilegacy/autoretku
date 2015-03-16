@@ -51,7 +51,7 @@
             this.textBox_password = new System.Windows.Forms.TextBox();
             this.button_login = new System.Windows.Forms.Button();
             this.checkBox_remember = new System.Windows.Forms.CheckBox();
-            this.worker_streamsvc = new System.ComponentModel.BackgroundWorker();
+            this.worker_service = new System.ComponentModel.BackgroundWorker();
             this.timer_refresh = new System.Windows.Forms.Timer(this.components);
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -62,16 +62,20 @@
             this.textBox_service_user = new System.Windows.Forms.TextBox();
             this.label_service_user = new System.Windows.Forms.Label();
             this.label_loginmsg = new System.Windows.Forms.Label();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label_statusmsg = new System.Windows.Forms.Label();
+            this.label_statusmsgcontent = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // webBrowser_retku
             // 
-            this.webBrowser_retku.Location = new System.Drawing.Point(15, 212);
+            this.webBrowser_retku.Location = new System.Drawing.Point(12, 260);
             this.webBrowser_retku.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser_retku.Name = "webBrowser_retku";
-            this.webBrowser_retku.Size = new System.Drawing.Size(425, 240);
+            this.webBrowser_retku.Size = new System.Drawing.Size(428, 240);
             this.webBrowser_retku.TabIndex = 0;
             this.webBrowser_retku.Url = new System.Uri("", System.UriKind.Relative);
             this.webBrowser_retku.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_retku_DocumentCompleted);
@@ -410,6 +414,7 @@
             this.textBox_username.Name = "textBox_username";
             this.textBox_username.Size = new System.Drawing.Size(261, 20);
             this.textBox_username.TabIndex = 21;
+            this.textBox_username.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_username_KeyPress);
             // 
             // textBox_password
             // 
@@ -418,6 +423,7 @@
             this.textBox_password.PasswordChar = '*';
             this.textBox_password.Size = new System.Drawing.Size(261, 20);
             this.textBox_password.TabIndex = 22;
+            this.textBox_password.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_password_KeyPress);
             // 
             // button_login
             // 
@@ -439,10 +445,10 @@
             this.checkBox_remember.Text = "Muista minut";
             this.checkBox_remember.UseVisualStyleBackColor = true;
             // 
-            // worker_streamsvc
+            // worker_service
             // 
-            this.worker_streamsvc.DoWork += new System.ComponentModel.DoWorkEventHandler(this.worker_service_DoWork);
-            this.worker_streamsvc.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.worker_service_RunWorkerCompleted);
+            this.worker_service.DoWork += new System.ComponentModel.DoWorkEventHandler(this.worker_service_DoWork);
+            this.worker_service.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.worker_service_RunWorkerCompleted);
             // 
             // timer_refresh
             // 
@@ -541,11 +547,39 @@
             this.label_loginmsg.Size = new System.Drawing.Size(0, 13);
             this.label_loginmsg.TabIndex = 28;
             // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.label_statusmsgcontent);
+            this.groupBox2.Controls.Add(this.label_statusmsg);
+            this.groupBox2.Location = new System.Drawing.Point(12, 215);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(427, 32);
+            this.groupBox2.TabIndex = 29;
+            this.groupBox2.TabStop = false;
+            // 
+            // label_statusmsg
+            // 
+            this.label_statusmsg.AutoSize = true;
+            this.label_statusmsg.Location = new System.Drawing.Point(9, 13);
+            this.label_statusmsg.Name = "label_statusmsg";
+            this.label_statusmsg.Size = new System.Drawing.Size(27, 13);
+            this.label_statusmsg.TabIndex = 0;
+            this.label_statusmsg.Text = "Tila:";
+            // 
+            // label_statusmsgcontent
+            // 
+            this.label_statusmsgcontent.AutoSize = true;
+            this.label_statusmsgcontent.Location = new System.Drawing.Point(42, 13);
+            this.label_statusmsgcontent.Name = "label_statusmsgcontent";
+            this.label_statusmsgcontent.Size = new System.Drawing.Size(0, 13);
+            this.label_statusmsgcontent.TabIndex = 1;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(452, 466);
+            this.ClientSize = new System.Drawing.Size(452, 83);
+            this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.label_loginmsg);
             this.Controls.Add(this.checkBox_remember);
             this.Controls.Add(this.button_login);
@@ -577,6 +611,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -605,7 +641,7 @@
         private System.Windows.Forms.TextBox textBox_password;
         private System.Windows.Forms.Button button_login;
         private System.Windows.Forms.CheckBox checkBox_remember;
-        private System.ComponentModel.BackgroundWorker worker_streamsvc;
+        private System.ComponentModel.BackgroundWorker worker_service;
         private System.Windows.Forms.Timer timer_refresh;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.GroupBox groupBox1;
@@ -616,6 +652,9 @@
         private System.Windows.Forms.ComboBox comboBox_service;
         private System.Windows.Forms.Button button_retrievedesc;
         private System.Windows.Forms.Label label_loginmsg;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.Label label_statusmsgcontent;
+        private System.Windows.Forms.Label label_statusmsg;
     }
 }
 
