@@ -1,6 +1,6 @@
-## AutoRetku
+﻿## AutoRetku
 
-![Screenshot](http://paste.nerv.fi/821471-AutoRetku.png "AutoRetku")
+![Screenshot](http://scpr.eu/4BP "AutoRetku")
 
 Windows-sovellus, joka hallitsee stream-mainosta [NESRetku.com](http://www.nesretku.com/) -sivustolla. Vaatii toimivan käyttäjätunnuksen sivustolle. Ohjelmalla ei ole virallisia sidoksia NESRetkun sivustoon, sen tekijöihin tai yhteisöön.
 
