@@ -63,8 +63,9 @@
             this.label_service_user = new System.Windows.Forms.Label();
             this.label_loginmsg = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.label_statusmsg = new System.Windows.Forms.Label();
             this.label_statusmsgcontent = new System.Windows.Forms.Label();
+            this.label_statusmsg = new System.Windows.Forms.Label();
+            this.webBrowser_logout = new System.Windows.Forms.WebBrowser();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -72,12 +73,13 @@
             // 
             // webBrowser_retku
             // 
-            this.webBrowser_retku.Location = new System.Drawing.Point(12, 260);
+            this.webBrowser_retku.Location = new System.Drawing.Point(12, 253);
             this.webBrowser_retku.MinimumSize = new System.Drawing.Size(20, 20);
             this.webBrowser_retku.Name = "webBrowser_retku";
-            this.webBrowser_retku.Size = new System.Drawing.Size(428, 240);
+            this.webBrowser_retku.Size = new System.Drawing.Size(58, 52);
             this.webBrowser_retku.TabIndex = 0;
             this.webBrowser_retku.Url = new System.Uri("", System.UriKind.Relative);
+            this.webBrowser_retku.Visible = false;
             this.webBrowser_retku.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_retku_DocumentCompleted);
             // 
             // button_timer
@@ -542,6 +544,8 @@
             // label_loginmsg
             // 
             this.label_loginmsg.AutoSize = true;
+            this.label_loginmsg.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_loginmsg.ForeColor = System.Drawing.Color.DarkRed;
             this.label_loginmsg.Location = new System.Drawing.Point(189, 62);
             this.label_loginmsg.Name = "label_loginmsg";
             this.label_loginmsg.Size = new System.Drawing.Size(0, 13);
@@ -557,6 +561,15 @@
             this.groupBox2.TabIndex = 29;
             this.groupBox2.TabStop = false;
             // 
+            // label_statusmsgcontent
+            // 
+            this.label_statusmsgcontent.AutoSize = true;
+            this.label_statusmsgcontent.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label_statusmsgcontent.Location = new System.Drawing.Point(42, 13);
+            this.label_statusmsgcontent.Name = "label_statusmsgcontent";
+            this.label_statusmsgcontent.Size = new System.Drawing.Size(0, 13);
+            this.label_statusmsgcontent.TabIndex = 1;
+            // 
             // label_statusmsg
             // 
             this.label_statusmsg.AutoSize = true;
@@ -566,19 +579,22 @@
             this.label_statusmsg.TabIndex = 0;
             this.label_statusmsg.Text = "Tila:";
             // 
-            // label_statusmsgcontent
+            // webBrowser_logout
             // 
-            this.label_statusmsgcontent.AutoSize = true;
-            this.label_statusmsgcontent.Location = new System.Drawing.Point(42, 13);
-            this.label_statusmsgcontent.Name = "label_statusmsgcontent";
-            this.label_statusmsgcontent.Size = new System.Drawing.Size(0, 13);
-            this.label_statusmsgcontent.TabIndex = 1;
+            this.webBrowser_logout.Location = new System.Drawing.Point(76, 253);
+            this.webBrowser_logout.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser_logout.Name = "webBrowser_logout";
+            this.webBrowser_logout.Size = new System.Drawing.Size(67, 52);
+            this.webBrowser_logout.TabIndex = 31;
+            this.webBrowser_logout.Visible = false;
+            this.webBrowser_logout.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_logout_DocumentCompleted);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(452, 83);
+            this.ClientSize = new System.Drawing.Size(449, 79);
+            this.Controls.Add(this.webBrowser_logout);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.label_loginmsg);
             this.Controls.Add(this.checkBox_remember);
@@ -605,6 +621,7 @@
             this.Controls.Add(this.webBrowser_retku);
             this.Cursor = System.Windows.Forms.Cursors.Default;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MaximizeBox = false;
             this.Name = "Form1";
             this.Text = "AutoRetku";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -655,6 +672,7 @@
         private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.Label label_statusmsgcontent;
         private System.Windows.Forms.Label label_statusmsg;
+        private System.Windows.Forms.WebBrowser webBrowser_logout;
     }
 }
 
