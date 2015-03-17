@@ -91,11 +91,13 @@ namespace AutoRetku
                     {
                         Debug.WriteLine("Olet antanut väärän salasanan.");
                         label_loginmsg.Text = "Olet antanut väärän salasanan.";
+                        button_login.Enabled = true;
                     }
                     else if (documentText.Contains("Olet antanut väärän käyttäjätunnuksen."))
                     {
                         Debug.WriteLine("Olet antanut väärän käyttäjätunnuksen.");
                         label_loginmsg.Text = "Olet antanut väärän käyttäjätunnuksen.";
+                        button_login.Enabled = true;
                     }
                 }
 
@@ -113,6 +115,7 @@ namespace AutoRetku
                     {
                         runonce = true;
                         this.Height = 295;
+                        label_loginmsg.Visible = false;
                         label_username.Visible = false;
                         label_password.Visible = false;
                         textBox_username.Visible = false;
