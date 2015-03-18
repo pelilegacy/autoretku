@@ -138,29 +138,35 @@ namespace AutoRetku
                         button_update_desc.Visible = true;
                         pictureBox1.Visible = true;
 
-                        timer_refresh.Start();
+                        timer_refresh.Start();                    
+                        worker_service.RunWorkerAsync();
                     }
 
                     if (StatusChecked == false)
                     {
-                        Debug.WriteLine("Checking status & service");
-                        HtmlElementCollection select, input;
-                        HtmlElement service_option, desc;
-                        select = webBrowser_retku.Document.GetElementsByTagName("select");
-                        input = webBrowser_retku.Document.GetElementsByTagName("input");
-                        service_option = select["palvelin"];
-                        desc = input["kuvaus"];
-                        textBox_desc.Text = desc.GetAttribute("value");
+                        if (documentText.Contains("name=\"palvelin\""))
+                        {
+                            Debug.WriteLine("Checking status & service");
+                            HtmlElementCollection select, input;
+                            HtmlElement service_option, desc;
+                            select = webBrowser_retku.Document.GetElementsByTagName("select");
+                            input = webBrowser_retku.Document.GetElementsByTagName("input");
+                            service_option = select["palvelin"];
+                            desc = input["kuvaus"];
+                            textBox_desc.Text = desc.GetAttribute("value");
 
-                        if (service_option.GetAttribute("value").ToString() == "3")
-                        {
-                            Debug.WriteLine("Setting status to Twitch");
-                            comboBox_service.SelectedIndex = 0;
-                        }
-                        else
-                        {
-                            Debug.WriteLine("Setting status to Hitbox");
-                            comboBox_service.SelectedIndex = 1;
+                            if (service_option.GetAttribute("value").ToString() == "3")
+                            {
+                                Debug.WriteLine("Setting status to Twitch");
+                                comboBox_service.SelectedIndex = 0;
+                            }
+                            else
+                            {
+                                Debug.WriteLine("Setting status to Hitbox");
+                                comboBox_service.SelectedIndex = 1;
+                            }
+
+                            StatusChecked = true;
                         }
 
                         if (documentText.Contains("alt=\"Kiinni\""))
@@ -183,7 +189,6 @@ namespace AutoRetku
                             pictureBox1.Image = AutoRetku.Properties.Resources.green;
                             notificationStatus = 2;
                         }
-                        StatusChecked = true;
                     }
 
                     if (workerStarted == false)
@@ -240,7 +245,7 @@ namespace AutoRetku
 
         private void button_timer_Click(object sender, EventArgs e)
         {
-            if (webBrowser_retku.Url == new Uri("http://www.nesretku.com/index.php?user=" + username))
+            if (webBrowser_retku.Url.ToString() == "http://www.nesretku.com/index.php?user=" + username)
             {
                 if (timerRunning == false)
                 {
@@ -252,8 +257,6 @@ namespace AutoRetku
                     checkBox_service_end.Enabled = false;
 
                     timerRunning = true;
-
-                    timer_refresh.Start();
                 }
                 else
                 {
@@ -312,6 +315,7 @@ namespace AutoRetku
         {
             if (allowServiceChange)
             {
+                System.Threading.Thread.Sleep(1000);
                 HtmlElementCollection select, input;
                 HtmlElement service_option, save;
                 select = webBrowser_retku.Document.GetElementsByTagName("select");
@@ -343,7 +347,7 @@ namespace AutoRetku
             {
                 if (selectedService() == 1)
                 {
-                    string source = GetSource("https://api.twitch.tv/kraken/channels/" + service_user); // Get json source code from Twitch API
+                    string source = GetSource("https://api.twitch.tv/kraken/streams?channel=" + service_user); // Get json source code from Twitch API
 
                     if (source != "")
                     {
@@ -411,12 +415,14 @@ namespace AutoRetku
 
         private void worker_service_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e) //  Running in background to monitor and edit stream status
         {
+            Debug.WriteLine("Running worker_service");
             service_user = textBox_service_user.Text;
 
             if (textBox_service_user.Text != "")
             {
-                if (isStartOnOnline() && notificationStatus == 0) // if checkBox_service_start is checked
+                if (isStartOnOnline() && notificationStatus != 2) // if checkBox_service_start is checked
                 {
+                    Debug.WriteLine("mainos on pois päältä ja striimi online, jatketaan");
                     if (selectedService() == 1) // if selected service is Twitch
                     {
                         if (isLive(1, service_user)) // if Twitch is Live
@@ -435,7 +441,7 @@ namespace AutoRetku
                     }
                 }
 
-                if (isStopOnOffline() && (notificationStatus == 2 || notificationStatus == 1))  // if checkBox_service_end is checked
+                if (isStopOnOffline() && notificationStatus != 0)  // if checkBox_service_end is checked
                 {
                     if (selectedService() == 1) // if selected service is Twitch
                     {
@@ -456,7 +462,10 @@ namespace AutoRetku
                 }
             }
 
-            worker_service.RunWorkerAsync();
+            if (!worker_service.IsBusy)
+            {
+                worker_service.RunWorkerAsync();
+            }
         }
 
         #endregion
@@ -468,18 +477,6 @@ namespace AutoRetku
         #endregion
 
         #region Own functions
-
-        private void retkuLogOut()
-        {
-            try
-            {
-                
-            }
-            catch (Exception)
-            {
-
-            }
-        }
 
         private void CheckStatus()
         {
@@ -517,7 +514,9 @@ namespace AutoRetku
             }
             else if (serviceid == 2)
             {
-                string source = GetSource("http://api.hitbox.tv/media/live/" + service_user); // Get json source code from Hitbox API
+                string source = GetSource("http://api.hitbox.tv/media/user/" + service_user); // Get json source code from Hitbox API
+
+                Debug.WriteLine(source + " " + service_user);
 
                 if (source != "")
                 {
