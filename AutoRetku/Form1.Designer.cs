@@ -593,9 +593,9 @@
             // 
             // button_deletelogin
             // 
-            this.button_deletelogin.Location = new System.Drawing.Point(307, 12);
+            this.button_deletelogin.Location = new System.Drawing.Point(304, 12);
             this.button_deletelogin.Name = "button_deletelogin";
-            this.button_deletelogin.Size = new System.Drawing.Size(52, 21);
+            this.button_deletelogin.Size = new System.Drawing.Size(55, 21);
             this.button_deletelogin.TabIndex = 33;
             this.button_deletelogin.Text = "Poista";
             this.button_deletelogin.UseVisualStyleBackColor = true;

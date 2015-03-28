@@ -128,6 +128,7 @@ namespace AutoRetku
                         textBox_password.Visible = false;
                         button_login.Visible = false;
                         checkBox_remember.Visible = false;
+                        button_deletelogin.Visible = false;
 
                         button_timer.Visible = true;
                         button_start.Visible = true;
