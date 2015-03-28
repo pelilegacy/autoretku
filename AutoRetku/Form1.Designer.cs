@@ -354,7 +354,7 @@
             this.button_start.Location = new System.Drawing.Point(145, 12);
             this.button_start.Name = "button_start";
             this.button_start.Size = new System.Drawing.Size(75, 23);
-            this.button_start.TabIndex = 15;
+            this.button_start.TabIndex = 2;
             this.button_start.Text = "Käynnistä";
             this.button_start.UseVisualStyleBackColor = true;
             this.button_start.Visible = false;
@@ -365,7 +365,7 @@
             this.button_pause.Location = new System.Drawing.Point(226, 12);
             this.button_pause.Name = "button_pause";
             this.button_pause.Size = new System.Drawing.Size(75, 23);
-            this.button_pause.TabIndex = 16;
+            this.button_pause.TabIndex = 3;
             this.button_pause.Text = "Tauko";
             this.button_pause.UseVisualStyleBackColor = true;
             this.button_pause.Visible = false;
@@ -376,7 +376,7 @@
             this.button_stop.Location = new System.Drawing.Point(307, 12);
             this.button_stop.Name = "button_stop";
             this.button_stop.Size = new System.Drawing.Size(75, 23);
-            this.button_stop.TabIndex = 17;
+            this.button_stop.TabIndex = 4;
             this.button_stop.Text = "Pysäytä";
             this.button_stop.UseVisualStyleBackColor = true;
             this.button_stop.Visible = false;
@@ -387,7 +387,7 @@
             this.button_update_desc.Location = new System.Drawing.Point(349, 71);
             this.button_update_desc.Name = "button_update_desc";
             this.button_update_desc.Size = new System.Drawing.Size(91, 20);
-            this.button_update_desc.TabIndex = 18;
+            this.button_update_desc.TabIndex = 10;
             this.button_update_desc.Text = "Päivitä kuvaus";
             this.button_update_desc.UseVisualStyleBackColor = true;
             this.button_update_desc.Visible = false;
@@ -417,7 +417,7 @@
             this.textBox_password.Name = "textBox_password";
             this.textBox_password.PasswordChar = '*';
             this.textBox_password.Size = new System.Drawing.Size(261, 20);
-            this.textBox_password.TabIndex = 22;
+            this.textBox_password.TabIndex = 2;
             this.textBox_password.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_password_KeyPress);
             // 
             // button_login
@@ -425,7 +425,7 @@
             this.button_login.Location = new System.Drawing.Point(365, 12);
             this.button_login.Name = "button_login";
             this.button_login.Size = new System.Drawing.Size(75, 43);
-            this.button_login.TabIndex = 23;
+            this.button_login.TabIndex = 4;
             this.button_login.Text = "Kirjaudu";
             this.button_login.UseVisualStyleBackColor = true;
             this.button_login.Click += new System.EventHandler(this.button_login_Click);
@@ -436,7 +436,7 @@
             this.checkBox_remember.Location = new System.Drawing.Point(98, 61);
             this.checkBox_remember.Name = "checkBox_remember";
             this.checkBox_remember.Size = new System.Drawing.Size(85, 17);
-            this.checkBox_remember.TabIndex = 24;
+            this.checkBox_remember.TabIndex = 3;
             this.checkBox_remember.Text = "Muista minut";
             this.checkBox_remember.UseVisualStyleBackColor = true;
             // 
@@ -480,7 +480,7 @@
             this.button_retrievedesc.Location = new System.Drawing.Point(251, 20);
             this.button_retrievedesc.Name = "button_retrievedesc";
             this.button_retrievedesc.Size = new System.Drawing.Size(170, 23);
-            this.button_retrievedesc.TabIndex = 29;
+            this.button_retrievedesc.TabIndex = 13;
             this.button_retrievedesc.Text = "Nouda kuvaus palvelusta";
             this.button_retrievedesc.UseVisualStyleBackColor = true;
             this.button_retrievedesc.Click += new System.EventHandler(this.button_retrievedesc_Click);
@@ -495,7 +495,7 @@
             this.comboBox_service.Location = new System.Drawing.Point(8, 0);
             this.comboBox_service.Name = "comboBox_service";
             this.comboBox_service.Size = new System.Drawing.Size(78, 21);
-            this.comboBox_service.TabIndex = 28;
+            this.comboBox_service.TabIndex = 11;
             this.comboBox_service.SelectedIndexChanged += new System.EventHandler(this.comboBox_service_SelectedIndexChanged);
             // 
             // checkBox_service_end
@@ -504,7 +504,7 @@
             this.checkBox_service_end.Location = new System.Drawing.Point(9, 71);
             this.checkBox_service_end.Name = "checkBox_service_end";
             this.checkBox_service_end.Size = new System.Drawing.Size(236, 17);
-            this.checkBox_service_end.TabIndex = 3;
+            this.checkBox_service_end.TabIndex = 15;
             this.checkBox_service_end.Text = "Kytke ilmoitus pois päältä kun lähetys loppuu";
             this.checkBox_service_end.UseVisualStyleBackColor = true;
             // 
@@ -514,7 +514,7 @@
             this.checkBox_service_start.Location = new System.Drawing.Point(9, 48);
             this.checkBox_service_start.Name = "checkBox_service_start";
             this.checkBox_service_start.Size = new System.Drawing.Size(207, 17);
-            this.checkBox_service_start.TabIndex = 2;
+            this.checkBox_service_start.TabIndex = 14;
             this.checkBox_service_start.Text = "Kytke ilmoitus päälle kun lähetys alkaa";
             this.checkBox_service_start.UseVisualStyleBackColor = true;
             // 
@@ -523,7 +523,7 @@
             this.textBox_service_user.Location = new System.Drawing.Point(92, 22);
             this.textBox_service_user.Name = "textBox_service_user";
             this.textBox_service_user.Size = new System.Drawing.Size(153, 20);
-            this.textBox_service_user.TabIndex = 1;
+            this.textBox_service_user.TabIndex = 12;
             // 
             // label_service_user
             // 
@@ -588,7 +588,7 @@
             this.comboBox_username.Location = new System.Drawing.Point(98, 12);
             this.comboBox_username.Name = "comboBox_username";
             this.comboBox_username.Size = new System.Drawing.Size(203, 21);
-            this.comboBox_username.TabIndex = 32;
+            this.comboBox_username.TabIndex = 1;
             this.comboBox_username.SelectedValueChanged += new System.EventHandler(this.comboBox_username_SelectedValueChanged);
             // 
             // button_deletelogin
@@ -596,7 +596,7 @@
             this.button_deletelogin.Location = new System.Drawing.Point(304, 12);
             this.button_deletelogin.Name = "button_deletelogin";
             this.button_deletelogin.Size = new System.Drawing.Size(55, 21);
-            this.button_deletelogin.TabIndex = 33;
+            this.button_deletelogin.TabIndex = 5;
             this.button_deletelogin.Text = "Poista";
             this.button_deletelogin.UseVisualStyleBackColor = true;
             this.button_deletelogin.Click += new System.EventHandler(this.button_deletelogin_Click);
@@ -606,13 +606,10 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(449, 79);
-            this.Controls.Add(this.button_deletelogin);
-            this.Controls.Add(this.comboBox_username);
             this.Controls.Add(this.webBrowser_logout);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.label_loginmsg);
             this.Controls.Add(this.checkBox_remember);
-            this.Controls.Add(this.button_login);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.button_update_desc);
@@ -632,6 +629,9 @@
             this.Controls.Add(this.label_password);
             this.Controls.Add(this.label_username);
             this.Controls.Add(this.webBrowser_retku);
+            this.Controls.Add(this.comboBox_username);
+            this.Controls.Add(this.button_deletelogin);
+            this.Controls.Add(this.button_login);
             this.Cursor = System.Windows.Forms.Cursors.Default;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
