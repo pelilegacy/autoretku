@@ -8,6 +8,9 @@ using System.Windows.Forms;
 using System.Net;
 using System.Diagnostics;
 using System.IO;
+using System.Security.Cryptography;
+using System.Data.SQLite;
+using System.Linq;
 
 namespace AutoRetku
 {
@@ -23,7 +26,6 @@ namespace AutoRetku
         private Boolean runonce = false;
         private Boolean timerRunning = false;
         private Boolean logged = false;
-        private Boolean desc_received = false;
         private Boolean workerStarted = false;
         private Boolean StatusChecked = false;
         private int notificationStatus = 0;
@@ -33,6 +35,10 @@ namespace AutoRetku
         private string retrieved_status;
         private string username = "";
         private string password = "";
+        private string userlist = "";
+        private static string PasswordHash = "";
+        private static string SaltKey = "";
+        private static string VIKey = "";
         // private string log = ""; commented logging for later development
 
         public string service_user;
@@ -118,7 +124,7 @@ namespace AutoRetku
                         label_loginmsg.Visible = false;
                         label_username.Visible = false;
                         label_password.Visible = false;
-                        textBox_username.Visible = false;
+                        comboBox_username.Visible = false;
                         textBox_password.Visible = false;
                         button_login.Visible = false;
                         checkBox_remember.Visible = false;
@@ -137,6 +143,11 @@ namespace AutoRetku
                         textBox_desc.Visible = true;
                         button_update_desc.Visible = true;
                         pictureBox1.Visible = true;
+
+                        if (checkBox_remember.Checked == true)
+                        {
+                            writeUserData(username, password);
+                        }
 
                         timer_refresh.Start();                    
                         worker_service.RunWorkerAsync();
@@ -219,6 +230,123 @@ namespace AutoRetku
             current = current.AddHours(1); // Setting time to one hour from now
             comboBox_ending_hour.Text = current.ToString("HH");
             comboBox_ending_minute.Text = current.ToString("mm");
+
+            checkDB();
+            listUsersDB();
+        }
+
+        private string randomString(int lenght)
+        {
+            var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+            var random = new Random();
+            var result = new string(Enumerable.Repeat(chars, lenght)
+                          .Select(s => s[random.Next(s.Length)])
+                          .ToArray());
+            return result;
+        }
+
+        private void writeUserData(string user, string pwd)
+        {
+            dbquery("insert into users (user, pwd) values ('" + Encrypt(user) + "', '" + Encrypt(pwd) + "')");
+        }
+
+        private void deleteUserData(string user)
+        {
+            dbquery("delete from users where user like '" + Encrypt(user) + "'");
+            comboBox_username.Text = "";
+            textBox_password.Text = "";
+            listUsersDB();
+        }
+
+        private string readPwd(string user)
+        {
+            using (SQLiteConnection c = new SQLiteConnection("Data Source=database.db;Version=3;"))
+            {
+                c.Open();
+                using (SQLiteCommand cmd = new SQLiteCommand("select pwd from users where user like '" + Encrypt(user) + "'", c))
+                {
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            return reader["pwd"].ToString();
+                        }
+                        return "";
+                    }
+                }
+            }
+        }
+
+        private void checkDB()
+        {
+            if (!File.Exists("database.db"))
+            {
+                SQLiteConnection.CreateFile("database.db");
+
+                dbquery("create table users (user char(28), pwd char(20))");
+                dbquery("create table keys (pwdhash char(72), salt char(72), vi char(72))");
+                dbquery("insert into keys (pwdhash, salt, vi) values ('" + randomString(64) + "', '" + randomString(64) + "', '" + randomString(16) + "')");
+            }
+
+            using (SQLiteConnection c = new SQLiteConnection("Data Source=database.db;Version=3;"))
+            {
+                c.Open();
+                using (SQLiteCommand cmd = new SQLiteCommand("select pwdhash, salt, vi from keys", c))
+                {
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            PasswordHash = reader["pwdhash"].ToString();
+                            SaltKey = reader["salt"].ToString();
+                            VIKey = reader["vi"].ToString();
+                        }
+                    }
+                }
+            }
+        }
+
+        private void dbquery(string sql)
+        {
+            using (SQLiteConnection c = new SQLiteConnection("Data Source=database.db;Version=3;"))
+            {
+                c.Open();
+                using (SQLiteCommand cmd = new SQLiteCommand(sql, c))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        private void listUsersDB()
+        {
+            comboBox_username.Items.Clear();
+            using (SQLiteConnection c = new SQLiteConnection("Data Source=database.db;Version=3;"))
+            {
+                c.Open();
+                using (SQLiteCommand cmd = new SQLiteCommand("select user from users", c))
+                {
+                    using (SQLiteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            if (userlist == "")
+                            {
+                                userlist = reader["user"].ToString();
+                                comboBox_username.Items.Add(Decrypt(reader["user"].ToString()));
+                                Debug.WriteLine(reader["user"].ToString());
+                            }
+                            else
+                            {
+                                userlist = userlist + "||" + reader["user"].ToString();
+                                comboBox_username.Items.Add(Decrypt(reader["user"].ToString()));
+                                Debug.WriteLine(reader["user"].ToString());
+                            }
+                        }
+                        Debug.WriteLine(userlist);
+                    }
+                }
+            }
         }
 
         private void timer_refresh_Tick(object sender, EventArgs e) // timer to refresh nesretku.com to prevent logout
@@ -303,7 +431,7 @@ namespace AutoRetku
         {
             Debug.WriteLine("Clicked login");
             button_login.Enabled = false;
-            username = textBox_username.Text;
+            username = comboBox_username.Text;
             password = textBox_password.Text;
 
             startlogin = true;
@@ -650,6 +778,73 @@ namespace AutoRetku
                 webBrowser_logout.Navigate("");
                 webBrowser_retku.Navigate("http://www.nesretku.com/index.php?user=" + username);
             }
+        }
+
+        #region Crypting
+
+        public static string Encrypt(string plainText)
+        {
+            byte[] plainTextBytes = Encoding.UTF8.GetBytes(plainText);
+
+            byte[] keyBytes = new Rfc2898DeriveBytes(PasswordHash, Encoding.ASCII.GetBytes(SaltKey)).GetBytes(256 / 8);
+            var symmetricKey = new RijndaelManaged() { Mode = CipherMode.CBC, Padding = PaddingMode.Zeros };
+            var encryptor = symmetricKey.CreateEncryptor(keyBytes, Encoding.ASCII.GetBytes(VIKey));
+
+            byte[] cipherTextBytes;
+
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var cryptoStream = new CryptoStream(memoryStream, encryptor, CryptoStreamMode.Write))
+                {
+                    cryptoStream.Write(plainTextBytes, 0, plainTextBytes.Length);
+                    cryptoStream.FlushFinalBlock();
+                    cipherTextBytes = memoryStream.ToArray();
+                    cryptoStream.Close();
+                }
+                memoryStream.Close();
+            }
+            return Convert.ToBase64String(cipherTextBytes);
+        }
+
+        public static string Decrypt(string encryptedText)
+        {
+            byte[] cipherTextBytes = Convert.FromBase64String(encryptedText);
+            byte[] keyBytes = new Rfc2898DeriveBytes(PasswordHash, Encoding.ASCII.GetBytes(SaltKey)).GetBytes(256 / 8);
+            var symmetricKey = new RijndaelManaged() { Mode = CipherMode.CBC, Padding = PaddingMode.None };
+
+            var decryptor = symmetricKey.CreateDecryptor(keyBytes, Encoding.ASCII.GetBytes(VIKey));
+            var memoryStream = new MemoryStream(cipherTextBytes);
+            var cryptoStream = new CryptoStream(memoryStream, decryptor, CryptoStreamMode.Read);
+            byte[] plainTextBytes = new byte[cipherTextBytes.Length];
+
+            int decryptedByteCount = cryptoStream.Read(plainTextBytes, 0, plainTextBytes.Length);
+            memoryStream.Close();
+            cryptoStream.Close();
+            return Encoding.UTF8.GetString(plainTextBytes, 0, decryptedByteCount).TrimEnd("\0".ToCharArray());
+        }
+
+        #endregion
+
+        private Boolean WriteDB(SQLiteConnection database)
+        {
+            return true;
+        }
+
+        private Boolean ReadDB(SQLiteConnection database, string select)
+        {
+            return true;
+        }
+
+        private void button_deletelogin_Click(object sender, EventArgs e)
+        {
+            deleteUserData(comboBox_username.Text);
+            MessageBox.Show("Käyttäjä " + comboBox_username.Text + " poistettu!");
+        }
+
+        private void comboBox_username_SelectedValueChanged(object sender, EventArgs e)
+        {
+            string user = comboBox_username.Text;
+            textBox_password.Text = Decrypt(readPwd(user));
         }
     }
 }

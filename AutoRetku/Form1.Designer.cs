@@ -47,7 +47,6 @@
             this.button_update_desc = new System.Windows.Forms.Button();
             this.label_username = new System.Windows.Forms.Label();
             this.label_password = new System.Windows.Forms.Label();
-            this.textBox_username = new System.Windows.Forms.TextBox();
             this.textBox_password = new System.Windows.Forms.TextBox();
             this.button_login = new System.Windows.Forms.Button();
             this.checkBox_remember = new System.Windows.Forms.CheckBox();
@@ -66,6 +65,8 @@
             this.label_statusmsgcontent = new System.Windows.Forms.Label();
             this.label_statusmsg = new System.Windows.Forms.Label();
             this.webBrowser_logout = new System.Windows.Forms.WebBrowser();
+            this.comboBox_username = new System.Windows.Forms.ComboBox();
+            this.button_deletelogin = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -410,14 +411,6 @@
             this.label_password.TabIndex = 20;
             this.label_password.Text = "Salasana:";
             // 
-            // textBox_username
-            // 
-            this.textBox_username.Location = new System.Drawing.Point(98, 12);
-            this.textBox_username.Name = "textBox_username";
-            this.textBox_username.Size = new System.Drawing.Size(261, 20);
-            this.textBox_username.TabIndex = 21;
-            this.textBox_username.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textBox_username_KeyPress);
-            // 
             // textBox_password
             // 
             this.textBox_password.Location = new System.Drawing.Point(98, 35);
@@ -589,11 +582,32 @@
             this.webBrowser_logout.Visible = false;
             this.webBrowser_logout.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.webBrowser_logout_DocumentCompleted);
             // 
+            // comboBox_username
+            // 
+            this.comboBox_username.FormattingEnabled = true;
+            this.comboBox_username.Location = new System.Drawing.Point(98, 12);
+            this.comboBox_username.Name = "comboBox_username";
+            this.comboBox_username.Size = new System.Drawing.Size(203, 21);
+            this.comboBox_username.TabIndex = 32;
+            this.comboBox_username.SelectedValueChanged += new System.EventHandler(this.comboBox_username_SelectedValueChanged);
+            // 
+            // button_deletelogin
+            // 
+            this.button_deletelogin.Location = new System.Drawing.Point(307, 12);
+            this.button_deletelogin.Name = "button_deletelogin";
+            this.button_deletelogin.Size = new System.Drawing.Size(52, 21);
+            this.button_deletelogin.TabIndex = 33;
+            this.button_deletelogin.Text = "Poista";
+            this.button_deletelogin.UseVisualStyleBackColor = true;
+            this.button_deletelogin.Click += new System.EventHandler(this.button_deletelogin_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(449, 79);
+            this.Controls.Add(this.button_deletelogin);
+            this.Controls.Add(this.comboBox_username);
             this.Controls.Add(this.webBrowser_logout);
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.label_loginmsg);
@@ -615,7 +629,6 @@
             this.Controls.Add(this.label_starting);
             this.Controls.Add(this.button_timer);
             this.Controls.Add(this.textBox_password);
-            this.Controls.Add(this.textBox_username);
             this.Controls.Add(this.label_password);
             this.Controls.Add(this.label_username);
             this.Controls.Add(this.webBrowser_retku);
@@ -655,7 +668,6 @@
         private System.Windows.Forms.Button button_update_desc;
         private System.Windows.Forms.Label label_username;
         private System.Windows.Forms.Label label_password;
-        private System.Windows.Forms.TextBox textBox_username;
         private System.Windows.Forms.TextBox textBox_password;
         private System.Windows.Forms.Button button_login;
         private System.Windows.Forms.CheckBox checkBox_remember;
@@ -674,6 +686,8 @@
         private System.Windows.Forms.Label label_statusmsgcontent;
         private System.Windows.Forms.Label label_statusmsg;
         private System.Windows.Forms.WebBrowser webBrowser_logout;
+        private System.Windows.Forms.ComboBox comboBox_username;
+        private System.Windows.Forms.Button button_deletelogin;
     }
 }
 
